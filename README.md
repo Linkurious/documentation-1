@@ -1,3 +1,19 @@
+### 🎯 Purpose of this branch
+
+Reproduce issues that I currently encounter when generating documentation with documentation.js
+
+### How to reproduce the "issues"
+
+`npm i && npm run doc:e:docd`
+
+Then check the comments in `example/doc.d.ts`
+
+---
+
+---
+
+---
+
 <p align="center">
   <img src="./.github/documentation-js-logo.png" width="650" />
 </p>
