@@ -26,7 +26,7 @@
     "no-shadow": 0,
     "no-undef": 2
   },
-  "extends": ["eslint:recommended", "prettier"],
+  "extends": ["eslint:recommended", "airbnb-typescript-prettier"],
   "env": {
     "node": true,
     "es6": true
