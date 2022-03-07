@@ -6,7 +6,17 @@ Reproduce issues that I currently encounter when generating documentation with d
 
 `npm i && npm run doc:e:docd`
 
+Open the generated documentation `example/index.html`
+
 Then check the comments in `example/doc.d.ts`
+
+### List of "issues"
+
+- #1 ignored class methods in declaration files
+- #2 some jsdoc description is not consumed
+- #3 event names and description using `@event` tag are corrupted
+- #4 event is not part of the class "Instance Members"
+- #5 ognored methods of imported class
 
 ---
 
