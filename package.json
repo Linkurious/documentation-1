@@ -86,6 +86,12 @@
   "scripts": {
     "build": "npm run doc",
     "release": "standard-version",
+    "doc-ts": "node ./bin/documentation.js build --pe .ts --re .ts --re .d.ts --github --sort-order alpha --format=html --output docs",
+    "doc-ts-exported": "node ./bin/documentation.js build --pe .ts --re .ts --re .d.ts --github --sort-order alpha --format=html --document-exported --output docs",
+    "doc:doc": "npm run doc-ts ./example/doc.ts",
+    "doc:e:doc": "npm run doc-ts-exported ./example/doc.ts",
+    "doc:docd": "npm run doc-ts ./example/doc.d.ts",
+    "doc:e:docd": "npm run doc-ts-exported ./example/doc.d.ts",
     "format": "prettier --write '{src,__tests__,declarations,bin,default_theme}/**/*.js'",
     "doc": "node ./bin/documentation.js build src/index.js -f md --access=public > docs/NODE_API.md",
     "self-lint": "node ./bin/documentation.js lint src",
