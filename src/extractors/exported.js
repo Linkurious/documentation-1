@@ -1,11 +1,11 @@
 import babelTraverse from '@babel/traverse';
-import isJSDocComment from '../is_jsdoc_comment.js';
 import t from '@babel/types';
 import nodePath from 'path';
 import fs from 'fs';
+import { createRequire } from 'module';
 import { parseToAst } from '../parsers/parse_to_ast.js';
 import findTarget from '../infer/finders.js';
-import { createRequire } from 'module';
+import isJSDocComment from '../is_jsdoc_comment.js';
 
 const require = createRequire(import.meta.url);
 const traverse = babelTraverse.default || babelTraverse;
@@ -100,8 +100,8 @@ export default function walkExported(
 
       if (t.isExportNamedDeclaration(path)) {
         const specifiers = path.get('specifiers');
-        const source = path.node.source;
-        const exportKind = path.node.exportKind;
+        const { source } = path.node;
+        const { exportKind } = path.node;
         specifiers.forEach(specifier => {
           let specData = data;
           let local;
@@ -176,6 +176,14 @@ function traverseExportedSubtree(path, data, addComments, overrideName) {
           addComments(data, path);
         }
         path.skip();
+      },
+      TSDeclareMethod(path) {
+        // Don't explicitly document constructor methods: their
+        // parameters are output as part of the class itself.
+        if (path.node.kind !== 'constructor') {
+          addComments(data, path);
+        }
+        path.skip();
       }
     });
   }
@@ -213,8 +221,8 @@ function findExportDeclaration(
 ) {
   const depPath = nodePath.resolve(nodePath.dirname(referrer), filename);
   const tmp = getCachedData(dataCache, depPath);
-  const ast = tmp.ast;
-  let data = tmp.data;
+  const { ast } = tmp;
+  let { data } = tmp;
 
   let rv;
   traverse(ast, {
@@ -252,10 +260,11 @@ function findExportDeclaration(
         // export {x as y}
         // export {x as y} from './file.js'
         const specifiers = path.get('specifiers');
-        const source = path.node.source;
+        const { source } = path.node;
         for (let i = 0; i < specifiers.length; i++) {
           const specifier = specifiers[i];
-          let local, exported;
+          let local;
+          let exported;
           if (t.isExportDefaultSpecifier(specifier)) {
             // export x from ...
             local = 'default';
