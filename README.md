@@ -13,7 +13,7 @@ Then check the comments in `example/doc.d.ts`
 ### List of "issues"
 
 - ~~#1 ignored class methods in declaration files~~
-- #2 some jsdoc description is not consumed
+- ~~#2 some jsdoc description is not consumed~~
 - #3 event names and description using `@event` tag are corrupted
 - #4 event is not part of the class "Instance Members"
 - ~~#5 documentation for interfaces is missing~~

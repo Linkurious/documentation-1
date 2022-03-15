@@ -4,10 +4,33 @@
 /* eslint-disable import/prefer-default-export */
 import { Utils } from './module';
 
+// --> #2 the interface description disapeared, is it an expected behavior ?
 // --> #5 documentation for interfaces is missing
+
+/**
+ * @public
+ * @typedef I
+ * This comment should appear in the generated doc.
+ */
 interface I {
   // this should be documented
   value: string;
+}
+
+declare class Test {
+  /**
+   * @method Test.documentedGetterWithTag
+   * Test.
+   * @return {number}
+   */
+  documentedGetterWithTag: (index: number) => number;
+
+  /**
+   * Test.
+   */
+  documentedGetterWithoutTag: (index: number) => number;
+
+  undocumentedGetter: (index: number) => number;
 }
 
 /**
@@ -37,8 +60,10 @@ export class ExportedAndDocumented {
   undocumentedValue: number;
 
   // --> #1 both methods are ignored even with --document-exported flag on
+  // --> #2 the method description disapeared, is it an expected behavior ?
 
   /**
+   * @method documentedMethod
    * Calculates the number
    * @param n infer type from ts
    * @return The important number
@@ -57,6 +82,7 @@ export class ExportedButUndocumented {
   undocumentedValue: number;
 
   // --> #1 both methods are ignored even with --document-exported flag on
+  // --> #2 the method description disapeared, is it an expected behavior ?
 
   /**
    * @method documentedMethod
@@ -69,4 +95,4 @@ export class ExportedButUndocumented {
   undocumentedMethod(): string;
 }
 
-export { Utils, I };
+export { Utils, I, Test };
