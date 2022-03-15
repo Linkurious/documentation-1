@@ -97,7 +97,7 @@ const flatteners = {
     result.kind = 'event';
 
     if (tag.description) {
-      result.name = tag.description;
+      result.name = tag.description.split('\n')[0];
     }
   },
   /**
@@ -654,7 +654,8 @@ export default function parseJSDoc(comment, loc, context) {
       'public',
       'class',
       'method',
-      'typedef'
+      'typedef',
+      'event'
     ]);
   }
 
