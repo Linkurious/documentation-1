@@ -4,6 +4,12 @@
 /* eslint-disable import/prefer-default-export */
 import { Utils } from './module';
 
+// --> #5 documentation for interfaces is missing
+interface I {
+  // this should be documented
+  value: string;
+}
+
 /**
  * Some module, nothing serious
  * @public
@@ -63,4 +69,4 @@ export class ExportedButUndocumented {
   undocumentedMethod(): string;
 }
 
-export { Utils };
+export { Utils, I };

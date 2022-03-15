@@ -16,7 +16,7 @@ Then check the comments in `example/doc.d.ts`
 - #2 some jsdoc description is not consumed
 - #3 event names and description using `@event` tag are corrupted
 - #4 event is not part of the class "Instance Members"
-- #5 ognored methods of imported class
+- ~~#5 documentation for interfaces is missing~~
 
 ---
 

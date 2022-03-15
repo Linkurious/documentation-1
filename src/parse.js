@@ -660,7 +660,7 @@ export default function parseJSDoc(comment, loc, context) {
       flatteners[tag.title](result, tag, tag.title);
     } else {
       result.errors.push({
-        message: 'unknown tag @' + tag.title,
+        message: `unknown tag @${tag.title}`,
         commentLineNumber: tag.lineNumber
       });
     }

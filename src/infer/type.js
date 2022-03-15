@@ -19,7 +19,7 @@ export default function inferType(comment) {
     return comment;
   }
 
-  const ast = comment.context.ast;
+  const { ast } = comment.context;
   const path = findTarget(ast);
   if (!path) {
     return comment;
@@ -58,6 +58,9 @@ export default function inferType(comment) {
       } else {
         type = constTypeMapping.NumericLiteral;
       }
+      break;
+    case 'TSInterfaceDeclaration':
+      type = n.body;
       break;
     default:
       if (ast.isObjectTypeProperty() && !ast.node.method) {

@@ -1,4 +1,5 @@
 import generator from '@babel/generator';
+
 const generate = generator.default || generator;
 
 const namedTypes = {
@@ -169,6 +170,11 @@ function tsDoctrine(type) {
       return {
         type: `${type.literal.type}Type`,
         value: type.literal.value
+      };
+    case 'TSInterfaceBody':
+      return {
+        type: 'RecordType',
+        fields: type.body.map(propertyToField).filter(x => x)
       };
     default:
       return {

@@ -1,9 +1,10 @@
+/* eslint-disable no-underscore-dangle */
 import _ from 'lodash';
 import t from '@babel/types';
+import util from 'util';
 import parse from '../parse.js';
 import walkComments from '../extractors/comments.js';
 import walkExported from '../extractors/exported.js';
-import util from 'util';
 import findTarget from '../infer/finders.js';
 import { parseToAst } from './parse_to_ast.js';
 
@@ -48,8 +49,7 @@ function _addComment(
 ) {
   // Avoid visiting the same comment twice as a leading
   // and trailing node
-  const key =
-    data.file + ':' + commentLoc.start.line + ':' + commentLoc.start.column;
+  const key = `${data.file}:${commentLoc.start.line}:${commentLoc.start.column}`;
   if (!visited.has(key)) {
     visited.add(key);
 
@@ -59,11 +59,12 @@ function _addComment(
       sortKey: string,
       ast?: Object,
       code?: string
-    }*/ = {
+    } */ = {
       loc: nodeLoc,
       file: data.file,
-      sortKey:
-        data.sortKey + ' ' + nodeLoc.start.line.toString().padStart(8, '0')
+      sortKey: `${data.sortKey} ${nodeLoc.start.line
+        .toString()
+        .padStart(8, '0')}`
     };
 
     if (includeContext) {

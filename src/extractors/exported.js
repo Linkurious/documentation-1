@@ -76,8 +76,13 @@ export default function walkExported(
     newResults.push.apply(newResults, comments);
   }
 
+  // store global statements
+  const globals = {};
   traverse(ast, {
     Statement(path) {
+      // https://stackoverflow.com/a/66294873
+      const isGlobal = !path.scope.getBinding('document');
+      if (isGlobal && path.node.id) globals[path.node.id.name] = path;
       path.skip();
     },
     ExportDeclaration(path) {
@@ -125,17 +130,24 @@ export default function walkExported(
             bindingPath = tmp.ast;
             specData = tmp.data;
           } else if (exportKind === 'value') {
-            bindingPath = path.scope.getBinding(local).path;
+            const binding = path.scope.getBinding(local);
+            if (binding === undefined) {
+              bindingPath = globals[local];
+            } else bindingPath = binding.path;
           } else if (exportKind === 'type') {
             bindingPath = findLocalType(path.scope, local);
           } else {
-            throw new Error('Unreachable');
+            console.error(new Error(`Unreachable : ${exportKind}`));
+            return path.skip();
           }
 
           if (bindingPath === undefined) {
-            throw new Error(
-              `Unable to find the value ${exported} in ${specData.file}`
+            console.error(
+              new Error(
+                `Unable to find the value ${exported} in ${specData.file}`
+              )
             );
+            return path.skip();
           }
           traverseExportedSubtree(bindingPath, specData, addComments, exported);
         });
@@ -161,6 +173,10 @@ function traverseExportedSubtree(path, data, addComments, overrideName) {
 
   if (t.isVariableDeclarator(target) && target.has('init')) {
     target = target.get('init');
+  }
+
+  if (t.isTSInterfaceDeclaration(target)) {
+    addComments(data, path);
   }
 
   if (target.isClass() || target.isObjectExpression()) {

@@ -1,10 +1,10 @@
 import { u } from 'unist-builder';
 import { remark } from 'remark';
-import mergeConfig from '../merge_config.js';
 import toc from 'remark-toc';
 import links from 'remark-reference-links';
 import hljs from 'highlight.js';
 import GithubSlugger from 'github-slugger';
+import mergeConfig from '../merge_config.js';
 import LinkerStack from './util/linker_stack.js';
 import rerouteLinks from './util/reroute_links.js';
 import _formatType from './util/format_type.js';
@@ -36,7 +36,7 @@ function buildMarkdownAST(comments, config) {
     comments,
     namespace => {
       const slugger = new GithubSlugger();
-      return '#' + slugger.slug(namespace);
+      return `#${slugger.slug(namespace)}`;
     }
   );
 
@@ -257,11 +257,7 @@ function buildMarkdownAST(comments, config) {
             [
               u(
                 'text',
-                comment.context.github.path +
-                  ':' +
-                  comment.context.loc.start.line +
-                  '-' +
-                  comment.context.loc.end.line
+                `${comment.context.github.path}:${comment.context.loc.start.line}-${comment.context.loc.end.line}`
               )
             ]
           )
