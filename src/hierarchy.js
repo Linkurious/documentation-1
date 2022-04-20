@@ -63,10 +63,11 @@ export default function (comments) {
       path = [];
 
       if (comment.memberof) {
-        // TODO: full namepath parsing
-        path = comment.memberof
-          .split('.')
-          .map(segment => ({ scope: 'static', name: segment }));
+        path = comment.memberof.split('.').map(segment => ({
+          scope: 'static',
+          // remove $1 at the end of the name
+          name: segment.replace(/\$\d*$/, '')
+        }));
       }
 
       if (!comment.name) {
@@ -220,6 +221,29 @@ export default function (comments) {
           }
           return memo + scopeChar + part.name;
         }, '');
+
+        // TODO: move this example out of this file
+        let commentHierarchy = comment.namespace;
+        node.comments
+          .map(({ tags }) => tags)
+          .flat()
+          .forEach(({ title, name }) => {
+            if (title === 'method') commentHierarchy = name;
+          });
+        const rootNodes = [
+          'Ogma',
+          'Node',
+          'NodeList',
+          'NodeAttributes',
+          'Edge',
+          'EdgeList',
+          'EdgeAttributes',
+          'geometry',
+          'Events'
+        ];
+        if (rootNodes.indexOf(commentHierarchy.split('.')[0]) === -1)
+          commentHierarchy = `OtherTypes.${commentHierarchy}`;
+        comment.hierarchy = commentHierarchy;
 
         if (hasUndefinedParent) {
           const memberOfTag = comment.tags.filter(
