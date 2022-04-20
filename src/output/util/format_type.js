@@ -147,14 +147,14 @@ export default function formatType(getHref, node) {
     case Syntax.FunctionType:
       result = [t('function (')];
 
-      if (node.this) {
-        if (node.new) {
+      if (node['this']) {
+        if (node['new']) {
           result.push(t('new: '));
         } else {
           result.push(t('this: '));
         }
 
-        result = result.concat(formatType(getHref, node.this));
+        result = result.concat(formatType(getHref, node['this']));
 
         if (node.params.length !== 0) {
           result.push(t(', '));

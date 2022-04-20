@@ -539,7 +539,7 @@ function flattenKindShorthand(result, tag, key) {
  * @param {string[]} tags tags to consider
  * @returns description string
  */
-function retreiveDescriptionNextToTags(rawComment, tags) {
+function retrieveDescriptionNextToTags(rawComment, tags) {
   // regex to retreive the whole description string (new lines included)
   const descLines = new RegExp(
     `@(${tags.join(
@@ -650,7 +650,7 @@ export default function parseJSDoc(comment, loc, context) {
   });
 
   if (result.description === '') {
-    result.description = retreiveDescriptionNextToTags(comment, [
+    result.description = retrieveDescriptionNextToTags(comment, [
       'public',
       'class',
       'method',

@@ -36,7 +36,7 @@ function buildMarkdownAST(comments, config) {
     comments,
     namespace => {
       const slugger = new GithubSlugger();
-      return `#${slugger.slug(namespace)}`;
+      return '#' + slugger.slug(namespace);
     }
   );
 
