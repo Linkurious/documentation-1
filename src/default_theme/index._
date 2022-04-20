@@ -27,68 +27,84 @@
             type='text' />
           <div id='toc'>
             <ul class='list-reset h5 py1-ul'>
-              <% docs.forEach(function(doc) { %>
-                <% var hasMembers = doc.members.static.length || doc.members.instance.length %>
-                <li><a
-                  href='#<%=slug(doc.namespace)%>'
-                  class="<% if (doc.kind === 'note') { %>h5 bold black caps<% } %><% if (hasMembers) { %> toggle-sibling<% } %>">
-                  <%- doc.name %>
-                  <% if (hasMembers) { %><span class='icon'>▸</span><% } %>
-                </a>
-                <% if (hasMembers) { %>
-                <div class='toggle-target display-none'>
-                  <% if (doc.members.static && doc.members.static.length) { %>
-                  <ul class='list-reset py1-ul pl1'>
-                    <li class='h5'><span>Static members</span></li>
-                    <% doc.members.static.forEach(function(member) { %>
-                      <li><a
-                        href='#<%=slug(member.namespace)%>'
-                        class='regular pre-open'>
-                        .<%- member.name %>
-                      </a></li>
-                    <% }) %>
-                    </ul>
-                  <% } %>
-                  <% if (doc.members.instance && doc.members.instance.length) { %>
-                    <ul class='list-reset py1-ul pl1'>
-                      <li class='h5'><span>Instance members</span></li>
-                      <% doc.members.instance.forEach(function(member) { %>
-                      <li><a
-                        href='#<%=slug(member.namespace)%>'
-                        class='regular pre-open'>
-                        #<%- member.name %>
-                      </a></li>
-                      <% }) %>
-                    </ul>
-                  <% } %>
-                  <% if (doc.members.inner && doc.members.inner.length) { %>
-                    <ul class='list-reset py1-ul pl1'>
-                      <li class='h5'><span>Inner members</span></li>
-                      <% doc.members.inner.forEach(function(member) { %>
-                      <li><a
-                        href='#<%=slug(member.namespace)%>'
-                        class='regular pre-open'>
-                        #<%- member.name %>
-                      </a></li>
-                      <% }) %>
-                    </ul>
-                  <% } %>
-                  <% if (doc.members.events && doc.members.events.length) { %>
-                    <ul class='list-reset py1-ul pl1'>
-                      <li class='h5'>Events</li>
-                      <% doc.members.events.forEach(function(member) { %>
-                        <li><a
-                          href='#<%=slug(member.namespace)%>'
-                          class='regular pre-open'>
-                          ⓔ <%- member.name %>
-                        </a></li>
-                      <% }) %>
-                    </ul>
-                  <% } %>
-                </div>
-                <% } %>
+              <% const renderTest = (key, value) => { %>
+                <% const entries = Object.entries(value).filter(([key]) => key !== "__comment__") %>
+                <% const comment = value.__comment__ %>
+
+                <% const hasMembers = entries.length || comment?.members.static.length || comment?.members.instance.length %>
+                <li>
+                  <a
+                    href='#<%=key.toLowerCase()%>'
+                    class="<% if (comment?.kind === 'note') { %>h5 bold black caps<% } %> <% if (hasMembers) { %> toggle-sibling<% } %>">
+                    <%- key %>
+                    <% if (hasMembers) { %><span class='icon'>▸</span><% } %>
+                  </a>
+                  <div class='toggle-target display-none'>
+                  
+                    <% if (comment) { %>
+                      <% if (comment.members.static && comment.members.static.length) { %>
+                      <ul class='list-reset py1-ul pl1'>
+                        <li class='h5'><span>Static members</span></li>
+                        <% comment.members.static.forEach(function(member) { %>
+                          <li><a
+                            href='#<%=slug(member.namespace)%>'
+                            class='regular pre-open'>
+                            .<%- member.name %>
+                          </a></li>
+                        <% }) %>
+                        </ul>
+                      <% } %>
+                      <% if (comment.members.instance && comment.members.instance.length) { %>
+                        <ul class='list-reset py1-ul pl1'>
+                          <li class='h5'><span>Instance members</span></li>
+                          <% comment.members.instance.forEach(function(member) { %>
+                          <li><a
+                            href='#<%=slug(member.namespace)%>'
+                            class='regular pre-open'>
+                            #<%- member.name %>
+                          </a></li>
+                          <% }) %>
+                        </ul>
+                      <% } %>
+                      <% if (comment.members.inner && comment.members.inner.length) { %>
+                        <ul class='list-reset py1-ul pl1'>
+                          <li class='h5'><span>Inner members</span></li>
+                          <% comment.members.inner.forEach(function(member) { %>
+                          <li><a
+                            href='#<%=slug(member.namespace)%>'
+                            class='regular pre-open'>
+                            #<%- member.name %>
+                          </a></li>
+                          <% }) %>
+                        </ul>
+                      <% } %>
+                      <% if (comment.members.events && comment.members.events.length) { %>
+                        <ul class='list-reset py1-ul pl1'>
+                          <li class='h5'>Events</li>
+                          <% comment.members.events.forEach(function(member) { %>
+                            <li><a
+                              href='#<%=slug(member.namespace)%>'
+                              class='regular pre-open'>
+                              ⓔ <%- member.name %>
+                            </a></li>
+                          <% }) %>
+                        </ul>
+                      <% } %>
+                    <% } %>
+
+                    <% if (hasMembers) { %>
+                        <ul class='list-reset py1-ul pl1'>
+                          <% entries.forEach(([ckey, cvalue]) => { %>
+                            <% renderTest(ckey, cvalue) %>
+                          <% }) %>
+                        <ul>
+                    <% } %>
+
+                  </div>
                 </li>
-              <% }) %>
+              <% } %>
+            
+              <% renderHierarchy({ comments: docs, render: renderTest}) %>
             </ul>
           </div>
           <div class='mt1 h6 quiet'>

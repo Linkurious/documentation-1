@@ -1,0 +1,19 @@
+<section class='py2 clearfix'>
+  <% const hierarchy = {} %>
+  
+  <% const ensurePath = (path, node = hierarchy) => { %>
+    <% const key = path.shift() %>
+    <% if (!node[key]) node[key] = {} %>
+    <% if (path.length) return ensurePath(path, node[key]) %>
+    <% return node[key] %>
+  <% } %>
+
+  <% comments.forEach((comment) => { %>
+    <% const node = ensurePath(comment.hierarchy.split(".")) %>
+    <% node.__comment__ = comment %>
+  <% }) %>
+
+  <% Object.entries(hierarchy).forEach(([key, value]) => { %>
+    <% render(key, value) %>
+  <% }) %>
+</section>
