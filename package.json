@@ -99,6 +99,8 @@
     "doc:e:testd": "npm run doc-ts-exported ./example/test.d.ts",
     "doc:test": "npm run doc-ts ./example/test.ts",
     "doc:e:test": "npm run doc-ts-exported ./example/test.ts",
+    "doc:mixins": "npm run doc-ts ./example/mixins.ts",
+    "doc:e:mixins": "npm run doc-ts-exported ./example/mixins.ts",
     "format": "prettier --write '{src,__tests__,declarations,bin,default_theme}/**/*.js'",
     "doc": "node ./bin/documentation.js build src/index.js -f md --access=public > docs/NODE_API.md",
     "self-lint": "node ./bin/documentation.js lint src",

@@ -66,11 +66,16 @@ export default function walkExported(
       .filter(Boolean);
   }
 
-  function addComments(data, path, overrideName) {
+  function addComments(data, path, overrideName, overrideMemberOf) {
     const comments = getComments(data, path);
     if (overrideName) {
       comments.forEach(function (comment) {
         comment.name = overrideName;
+      });
+    }
+    if (overrideMemberOf) {
+      comments.forEach(function (comment) {
+        comment.memberof = overrideMemberOf;
       });
     }
     newResults.push.apply(newResults, comments);
@@ -158,12 +163,19 @@ export default function walkExported(
   return newResults;
 }
 
-function traverseExportedSubtree(path, data, addComments, overrideName) {
+function traverseExportedSubtree(
+  path,
+  data,
+  addComments,
+  overrideName,
+  overrideMemberOf
+) {
   let attachCommentPath = path;
   if (path.parentPath && path.parentPath.isExportDeclaration()) {
     attachCommentPath = path.parentPath;
   }
-  addComments(data, attachCommentPath, overrideName);
+  // Avoid duplicates if memberof is overridden
+  if (!overrideMemberOf) addComments(data, attachCommentPath, overrideName);
 
   let target = findTarget(path);
   if (!target) {
@@ -175,7 +187,7 @@ function traverseExportedSubtree(path, data, addComments, overrideName) {
   }
 
   if (t.isTSInterfaceDeclaration(target)) {
-    addComments(data, path);
+    addComments(data, path, undefined, overrideMemberOf);
 
     // Heritage needs documentation too
     if (target.node.extends) {
@@ -183,12 +195,37 @@ function traverseExportedSubtree(path, data, addComments, overrideName) {
         .map(({ expression }) => expression.name)
         .forEach(name => {
           const binding = getBinding(path.scope, name);
-          traverseExportedSubtree(binding, data, addComments, overrideName);
+          traverseExportedSubtree(
+            binding,
+            data,
+            addComments,
+            overrideName,
+            overrideMemberOf
+          );
         });
     }
   }
 
   if (target.isClass() || target.isObjectExpression()) {
+    // Handle mixins if a declaration is found in the target scope
+    const declaration = findDeclaration(
+      path.scope,
+      target.node.id.name,
+      'TSInterfaceDeclaration'
+    );
+    if (declaration)
+      declaration.node.extends
+        .map(({ expression }) => getBinding(path.scope, expression.name))
+        .filter(binding => binding)
+        .forEach(binding => {
+          traverseExportedSubtree(
+            binding,
+            data,
+            addComments,
+            overrideName,
+            target.node.id.name
+          );
+        });
     target.traverse({
       Property(path) {
         addComments(data, path);
@@ -207,7 +244,8 @@ function traverseExportedSubtree(path, data, addComments, overrideName) {
               getBinding(path.scope, typeName),
               data,
               addComments,
-              overrideName
+              overrideName,
+              overrideMemberOf
             );
         }
         path.skip();
@@ -216,7 +254,7 @@ function traverseExportedSubtree(path, data, addComments, overrideName) {
         // Don't explicitly document constructor methods: their
         // parameters are output as part of the class itself.
         if (path.node.kind !== 'constructor') {
-          addComments(data, path);
+          addComments(data, path, undefined, overrideMemberOf);
         }
         path.skip();
       },
@@ -224,7 +262,7 @@ function traverseExportedSubtree(path, data, addComments, overrideName) {
         // Don't explicitly document constructor methods: their
         // parameters are output as part of the class itself.
         if (path.node.kind !== 'constructor') {
-          addComments(data, path);
+          addComments(data, path, undefined, overrideMemberOf);
         }
         path.skip();
       }
@@ -394,13 +432,23 @@ function findLocalType(scope, local) {
   return rv;
 }
 
-function findDeclaration(scope, local) {
+/**
+ * Find a declaration node path based on its name and type in a specific scope.
+ * @param scope searching scope
+ * @param local declaration local name in this scope
+ * @param type declaration optional type
+ * @returns
+ */
+function findDeclaration(scope, local, type = '*') {
   let rv;
   let scopePath = scope.path;
   while (!rv && scopePath) {
     scopePath.traverse({
       Declaration(path) {
-        if (path.node.id?.name === local) {
+        if (
+          (type === '*' || path.node.type === type) &&
+          path.node.id?.name === local
+        ) {
           rv = path;
           path.stop();
         } else {
