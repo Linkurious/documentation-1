@@ -207,15 +207,16 @@ function traverseExportedSubtree(
   }
 
   if (target.isClass() || target.isObjectExpression()) {
+    const classScope = path.scope;
     // Handle mixins if a declaration is found in the target scope
     const declaration = findDeclaration(
-      path.scope,
+      classScope,
       target.node.id.name,
       'TSInterfaceDeclaration'
     );
     if (declaration)
       declaration.node.extends
-        .map(({ expression }) => getBinding(path.scope, expression.name))
+        .map(({ expression }) => getBinding(classScope, expression.name))
         .filter(binding => binding)
         .forEach(binding => {
           traverseExportedSubtree(
@@ -241,7 +242,7 @@ function traverseExportedSubtree(
             path.node.typeAnnotation?.typeAnnotation?.typeName?.name;
           if (typeName)
             traverseExportedSubtree(
-              getBinding(path.scope, typeName),
+              getBinding(classScope, typeName),
               data,
               addComments,
               overrideName,
@@ -259,6 +260,15 @@ function traverseExportedSubtree(
         path.skip();
       },
       TSDeclareMethod(path) {
+        // Let's document all the types that this method is using.
+        path.traverse({
+          TSTypeReference(refPath) {
+            const binding = getBinding(classScope, refPath.node.typeName.name);
+            // Add comments only if binding is found in the class scope.
+            if (binding)
+              addComments(data, binding, undefined, overrideMemberOf);
+          }
+        });
         // Don't explicitly document constructor methods: their
         // parameters are output as part of the class itself.
         if (path.node.kind !== 'constructor') {
