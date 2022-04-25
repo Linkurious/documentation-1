@@ -265,8 +265,7 @@ function traverseExportedSubtree(
           TSTypeReference(refPath) {
             const binding = getBinding(classScope, refPath.node.typeName.name);
             // Add comments only if binding is found in the class scope.
-            if (binding)
-              addComments(data, binding, undefined, overrideMemberOf);
+            if (binding) addComments(data, binding);
           }
         });
         // Don't explicitly document constructor methods: their
