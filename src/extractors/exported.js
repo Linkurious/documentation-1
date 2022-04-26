@@ -229,7 +229,6 @@ function traverseExportedSubtree(
         });
     target.traverse({
       Property(path) {
-        addComments(data, path);
         // If leading comment has @inner tag
         if (
           path.node.leadingComments &&
@@ -237,7 +236,7 @@ function traverseExportedSubtree(
             .map(({ value }) => value.match(/^ *\*\*? ?@inner/))
             .filter(matching => matching).length > 0
         ) {
-          // Then, document the property type
+          // Document the property type
           const typeName =
             path.node.typeAnnotation?.typeAnnotation?.typeName?.name;
           if (typeName)
@@ -245,10 +244,9 @@ function traverseExportedSubtree(
               getBinding(classScope, typeName),
               data,
               addComments,
-              overrideName,
-              overrideMemberOf
+              overrideName
             );
-        }
+        } else addComments(data, path);
         path.skip();
       },
       Method(path) {
