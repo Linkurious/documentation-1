@@ -5,13 +5,17 @@
   <title><%- config['project-name'] %> <%- config['project-version'] %> | Documentation</title><% if (config['project-description']) { %>
   <meta name='description' content='<%- config['project-description'] %>'><% } %>
   <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <link href='assets/ogma.css' rel='stylesheet'>
+  <link href='assets/ogma-api.css' rel='stylesheet'>
+  <link href='assets/vendor/font-awesome/css/font-awesome.css' rel='stylesheet'>
+  <link href='assets/vendor/highlightjs/default.css' rel='stylesheet'>
   <link href='assets/bass.css' rel='stylesheet'>
   <link href='assets/style.css' rel='stylesheet'>
   <link href='assets/github.css' rel='stylesheet'>
   <link href='assets/split.css' rel='stylesheet'><% if (config['favicon']) { %>
   <link href='<%- config['favicon'] %>' rel='icon' ><% } %>
 </head>
-<body class='documentation m0'>
+<body class='documentation m0 api-page'>
     <div class='flex'>
       <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
         <div class='py1 px2'>
@@ -26,7 +30,7 @@
             autocorrect='off'
             type='text' />
           <div id='toc'>
-            <ul class='list-reset h5 py1-ul'>
+            <ul class='list-reset h3 py1-ul'>
               <% const renderTest = (key, value) => { %>
                 <% const entries = Object.entries(value).filter(([key]) => key !== "__comment__") %>
                 <% const comment = value.__comment__ %>
@@ -112,7 +116,7 @@
           </div>
         </div>
       </div>
-      <div id='split-right' class='relative overflow-auto height-viewport-100'>
+      <div id='split-right' class='relative overflow-auto height-viewport-100 main'>
         <% docs.forEach(function(s) { %>
           <% if (s.kind === 'note' && !s.children) { %>
             <div class='keyline-top-not py2'><%=renderNote({ note: s })%></div>
