@@ -1,5 +1,6 @@
 __tests__/fixture/*
 src/default_theme/*
+src/ogma_theme/*
 coverage/*
 lib/*
 declarations/*

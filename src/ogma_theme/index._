@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset='utf-8'>
+  <title><%- config['project-name'] %> <%- config['project-version'] %> | Documentation</title><% if (config['project-description']) { %>
+  <meta name='description' content='<%- config['project-description'] %>'><% } %>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <link href='assets/bass.css' rel='stylesheet'>
+  <link href='assets/style.css' rel='stylesheet'>
+  <link href='assets/github.css' rel='stylesheet'>
+  <link href='assets/split.css' rel='stylesheet'><% if (config['favicon']) { %>
+  <link href='<%- config['favicon'] %>' rel='icon' ><% } %>
+</head>
+<body class='documentation m0'>
+    <div class='flex'>
+      <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
+        <div class='py1 px2'>
+          <h3 class='mb0 no-anchor'><%- config['project-name'] %></h3>
+          <div class='mb1'><code><%- config['project-version'] %></code></div>
+          <input
+            placeholder='Filter'
+            id='filter-input'
+            class='col12 block input'
+            spellcheck='false'
+            autocapitalize='off'
+            autocorrect='off'
+            type='text' />
+          <div id='toc'>
+            <ul class='list-reset h5 py1-ul'>
+              <% const renderTest = (key, value) => { %>
+                <% const entries = Object.entries(value).filter(([key]) => key !== "__comment__") %>
+                <% const comment = value.__comment__ %>
+
+                <% const hasMembers = entries.length || comment?.members.static.length || comment?.members.instance.length %>
+                <li>
+                  <a
+                    href='#<%=key.toLowerCase()%>'
+                    class="<% if (comment?.kind === 'note') { %>h5 bold black caps<% } %> <% if (hasMembers) { %> toggle-sibling<% } %>">
+                    <%- key %>
+                    <% if (hasMembers) { %><span class='icon'>▸</span><% } %>
+                  </a>
+                  <div class='toggle-target display-none'>
+                  
+                    <% if (comment) { %>
+                      <% if (comment.members.static && comment.members.static.length) { %>
+                      <ul class='list-reset py1-ul pl1'>
+                        <li class='h5'><span>Static members</span></li>
+                        <% comment.members.static.forEach(function(member) { %>
+                          <li><a
+                            href='#<%=slug(member.namespace)%>'
+                            class='regular pre-open'>
+                            .<%- member.name %>
+                          </a></li>
+                        <% }) %>
+                        </ul>
+                      <% } %>
+                      <% if (comment.members.instance && comment.members.instance.length) { %>
+                        <ul class='list-reset py1-ul pl1'>
+                          <li class='h5'><span>Instance members</span></li>
+                          <% comment.members.instance.forEach(function(member) { %>
+                          <li><a
+                            href='#<%=slug(member.namespace)%>'
+                            class='regular pre-open'>
+                            #<%- member.name %>
+                          </a></li>
+                          <% }) %>
+                        </ul>
+                      <% } %>
+                      <% if (comment.members.inner && comment.members.inner.length) { %>
+                        <ul class='list-reset py1-ul pl1'>
+                          <li class='h5'><span>Inner members</span></li>
+                          <% comment.members.inner.forEach(function(member) { %>
+                          <li><a
+                            href='#<%=slug(member.namespace)%>'
+                            class='regular pre-open'>
+                            #<%- member.name %>
+                          </a></li>
+                          <% }) %>
+                        </ul>
+                      <% } %>
+                      <% if (comment.members.events && comment.members.events.length) { %>
+                        <ul class='list-reset py1-ul pl1'>
+                          <li class='h5'>Events</li>
+                          <% comment.members.events.forEach(function(member) { %>
+                            <li><a
+                              href='#<%=slug(member.namespace)%>'
+                              class='regular pre-open'>
+                              ⓔ <%- member.name %>
+                            </a></li>
+                          <% }) %>
+                        </ul>
+                      <% } %>
+                    <% } %>
+
+                    <% if (hasMembers) { %>
+                        <ul class='list-reset py1-ul pl1'>
+                          <% entries.forEach(([ckey, cvalue]) => { %>
+                            <% renderTest(ckey, cvalue) %>
+                          <% }) %>
+                        <ul>
+                    <% } %>
+
+                  </div>
+                </li>
+              <% } %>
+            
+              <% renderHierarchy({ comments: docs, render: renderTest}) %>
+            </ul>
+          </div>
+          <div class='mt1 h6 quiet'>
+            <a href='https://documentation.js.org/reading-documentation.html'>Need help reading this?</a>
+          </div>
+        </div>
+      </div>
+      <div id='split-right' class='relative overflow-auto height-viewport-100'>
+        <% docs.forEach(function(s) { %>
+          <% if (s.kind === 'note' && !s.children) { %>
+            <div class='keyline-top-not py2'><%=renderNote({ note: s })%></div>
+          <% } else { %>
+          <%= renderSection({
+            section: s,
+            renderSection: renderSection,
+            renderSectionList: renderSectionList,
+            renderParamProperty: renderParamProperty
+          }) %>
+          <% } %>
+        <% }) %>
+      </div>
+    </div>
+  <script src='assets/anchor.js'></script>
+  <script src='assets/split.js'></script>
+  <script src='assets/site.js'></script>
+</body>
+</html>

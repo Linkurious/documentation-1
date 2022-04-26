@@ -101,6 +101,10 @@ export default async function (comments, config) {
     }
   };
 
+  sharedImports.imports.renderHierarchy = template(
+    await fs.readFile(path.join(__dirname, 'hierarchy._'), 'utf8'),
+    sharedImports
+  );
   sharedImports.imports.renderSectionList = template(
     await fs.readFile(path.join(__dirname, 'section_list._'), 'utf8'),
     sharedImports
