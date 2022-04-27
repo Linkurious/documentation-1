@@ -14,6 +14,6 @@
   <% }) %>
 
   <% Object.entries(hierarchy).forEach(([key, value]) => { %>
-    <% render(key, value) %>
+    <% render(key, key, value) %>
   <% }) %>
 </section>

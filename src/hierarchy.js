@@ -223,7 +223,16 @@ export default function (comments) {
         }, '');
 
         // TODO: move this example out of this file
-        let commentHierarchy = comment.namespace;
+        let commentHierarchy = comment.path.reduce((memo, part) => {
+          if (part.kind === 'event') {
+            return memo + '.event:' + part.name;
+          }
+          let scopeChar = '';
+          if (part.scope) {
+            scopeChar = scopeChars[part.scope];
+          }
+          return memo + scopeChar + part.name;
+        }, '');
         node.comments
           .map(({ tags }) => tags)
           .flat()
@@ -241,6 +250,7 @@ export default function (comments) {
           'geometry',
           'Events'
         ];
+        comment.namespace = commentHierarchy;
         if (rootNodes.indexOf(commentHierarchy.split('.')[0]) === -1)
           commentHierarchy = `OtherTypes.${commentHierarchy}`;
         comment.hierarchy = commentHierarchy;

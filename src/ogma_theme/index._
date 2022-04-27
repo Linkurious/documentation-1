@@ -31,14 +31,14 @@
             type='text' />
           <div id='toc'>
             <ul class='list-reset h3 py1-ul'>
-              <% const renderTest = (key, value) => { %>
+              <% const renderTest = (fullKey, key, value) => { %>
                 <% const entries = Object.entries(value).filter(([key]) => key !== "__comment__") %>
                 <% const comment = value.__comment__ %>
 
                 <% const hasMembers = entries.length || comment?.members.static.length || comment?.members.instance.length %>
                 <li>
                   <a
-                    href='#<%=key.toLowerCase()%>'
+                    href='#<%=fullKey.toLowerCase()%>'
                     class="<% if (comment?.kind === 'note') { %>h5 bold black caps<% } %> <% if (hasMembers) { %> toggle-sibling<% } %>">
                     <%- key %>
                     <% if (hasMembers) { %><span class='icon'>▸</span><% } %>
@@ -99,7 +99,7 @@
                     <% if (hasMembers) { %>
                         <ul class='list-reset py1-ul pl1'>
                           <% entries.forEach(([ckey, cvalue]) => { %>
-                            <% renderTest(ckey, cvalue) %>
+                            <% renderTest(fullKey + ckey, ckey, cvalue) %>
                           <% }) %>
                         <ul>
                     <% } %>
