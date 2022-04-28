@@ -55,11 +55,14 @@ export default async function (comments, config) {
         return slugger.slug(str);
       },
       formatParamsType(type) {
-        return formatters
+        const isFunction = formatters
           .type(type)
           .match(/(?<=^function ).*/)
           ?.pop()
           ?.trim();
+        if (isFunction) return isFunction;
+        if (type?.type === 'RecordType') return ': object';
+        return `: ${formatters.type(type)}`;
       },
       shortSignature(section) {
         var prefix = '';
