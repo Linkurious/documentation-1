@@ -4,7 +4,8 @@
   <div class='clearfix'>
     <% if (typeof nested === 'undefined') { %>
     <h3 class='fl m0 <%- section.namespace.split('.').length > 1 ? 'list-item' : 'section-name' %>' id='<%- slug(section.namespace) %>'>
-      <%- section.namespace %>
+      <span class='list-name name'><%= section.namespace.replace(/[#~]/, '.') %></span>
+      <%= formatParamsType(section.type) %>
     </h3>
     <% } %>
   </div>
@@ -13,13 +14,6 @@
   <div class='description'>
     <%= md(section.description) %>
   </div>
-    <div class='pre p1 fill-light mt0'><%= signature(section) %></div>
-  <% if (section.type) { %>
-    <p>
-      Type:
-      <%= formatType(section.type) %>
-    </p>
-  <% } %>
   <% if (section.augments && section.augments.length) { %>
     <p>
       Extends

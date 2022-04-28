@@ -5,7 +5,7 @@
         <div class="list-item">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
             <span class='list-name name'><%= member.namespace.replace(/[#~]/, '.') %></span>
-            <%= shortSignature(member).match(/\(.*\)$/, '')?.pop() %>
+            <%= formatParamsType(member.type) %>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">

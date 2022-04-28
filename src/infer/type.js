@@ -46,6 +46,17 @@ export default function inferType(comment) {
       } else if (n.kind === 'set' && n.params[0]) {
         type = n.params[0].typeAnnotation;
       }
+      // Mock function type if we don't find type
+      if (type === undefined)
+        type = {
+          type: 'TSTypeAnnotation',
+          typeAnnotation: {
+            type: 'TSFunctionType',
+            typeParameters: undefined,
+            parameters: n.params,
+            typeAnnotation: n.returnType
+          }
+        };
       break;
     case 'TypeAlias':
       type = n.right;

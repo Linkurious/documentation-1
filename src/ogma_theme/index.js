@@ -54,6 +54,13 @@ export default async function (comments, config) {
         var slugger = new GithubSlugger();
         return slugger.slug(str);
       },
+      formatParamsType(type) {
+        return formatters
+          .type(type)
+          .match(/(?<=^function ).*/)
+          ?.pop()
+          ?.trim();
+      },
       shortSignature(section) {
         var prefix = '';
         if (section.kind === 'class') {
