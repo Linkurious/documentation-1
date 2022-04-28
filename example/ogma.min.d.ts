@@ -1,15 +1,14 @@
 /**
  * Ogma
  * @description Graph visualization library
- * @version 4.1.0 (built on Thu Mar 03 2022 12:01:42 GMT+0100 (heure normale d’Europe centrale))
+ * @version 4.1.0 (built on Thu Apr 28 2022 14:56:41 GMT+0200 (heure d’été d’Europe centrale))
  * @author Linkurious SAS
  * @license (c) Linkurious 2022. All rights reserved.
  * @preserve
  */
 /* eslint-disable */
 
-// import { Map } from 'leaflet';
-interface Map {}
+import { Map } from 'leaflet';
 
 interface NodeTextStyle {
   content?: TextContent;
@@ -85,6 +84,7 @@ declare type BadgeImage =
     };
 /**
  * @public
+ * @typedef {object} Badge
  * @property {Color} [color="white"]                                           Fill color of the badge.
  * @property {number} [scale=0.45]                                             Size of the badge relative to the node.
  * @property {number} [positionScale=1]                                        Center of the badge relative to the node size (1 = at the node's border)
@@ -1597,6 +1597,7 @@ interface NodeAttributeSubTreeTypes {
 
 /**
  * @public
+ * @typedef {"circle"|"cross"|"diamond"|"pentagon"|"square"|"star"|"equilateral"} NodeShape
  */
 declare type NodeShape =
   | 'circle'
@@ -1667,6 +1668,7 @@ declare type NodeTextStyleRequired = Required<
 };
 /**
  * @public
+ * @typedef {object} NodeAttributes
  *
  * @property {number} [x=0]                                                    X coordinate of the node (graph space)
  * @property {number} [y=0]                                                    Y coordinate of the node (graph space)
@@ -2578,6 +2580,10 @@ interface EdgeAttributeSubTreeTypes {
 
 /**
  * @public
+ * @typedef {"line"|"arrow"|"tapered"|"dashed"|"dotted"} PredefinedEdgeShape These are valid values to ensure retro-compatibility with Ogma < 2.2
+ * @typedef {"line"|"triangle"} EdgeType
+ * @typedef {null|"arrow"|"circle-hole-arrow"|"triangle-hole-arrow"|"short-arrow"|"sharp-arrow"|"circle"|"square"} EdgeExtremity
+ * @typedef {"plain"|"dotted"|"dashed"} EdgeStyle
  */
 declare type PredefinedEdgeShape =
   | 'line'
@@ -2626,6 +2632,7 @@ declare type EdgeTextStyleRequired = Required<
 };
 /**
  * @public
+ * @typedef {object} EdgeAttributes
  * Default values indicate the system values (when an edge has not been assigned any value for that attribute).
  *
  * @property {PixelSize} [width=1]                                        Width of the edge (graph space)
@@ -2841,6 +2848,7 @@ declare type EdgeAttributeTypes = EdgeAttributesDottedMapping<
 
 /**
  * @public
+ * @typedef {string|Array<string>} PropertyPath
  */
 declare type PropertyPath = string | string[];
 interface DataChange {
@@ -2885,26 +2893,31 @@ interface Size {
 }
 /**
  * @public
+ * @typedef {string|number} NodeId
  */
 declare type NodeId = string | number;
 /**
  * @public
+ * @typedef {string|number} EdgeId
  */
 declare type EdgeId = string | number;
 declare type Direction = 'in' | 'out' | 'both';
 /**
  * Edge direction
  * @public
+ * @typedef {"both"|"in"|"out"} EdgeDirection
  */
 declare type EdgeDirection = Direction;
 /**
  * @public
+ * @typedef {"visible"|"raw"|"all"} Filter Indicates which nodes and edges to take into account.
  * "visible" refers to visible element, "raw" refers to elements that are not the result of a transformation (the
  * "original" graph), and "all" refers to all elements, including the non-visible ones.
  */
 declare type Filter = 'visible' | 'raw' | 'all' | /* @internal */ '_all';
 /**
  * @public
+ * @typedef {object} RawNode
  * @property {NodeId} [id]
  * @property {NodeAttributes} [attributes]
  * @property {any} [data]
@@ -2916,6 +2929,7 @@ interface RawNode<T = any> {
 }
 /**
  * @public
+ * @typedef {object} RawEdge
  * @property {EdgeId} [id]
  * @property {NodeId} source
  * @property {NodeId} target
@@ -2932,6 +2946,7 @@ interface RawEdge<T = any> {
 declare type RawItem$1<T> = RawNode<T> | RawEdge<T>;
 /**
  * @public
+ * @typedef {object} RawGraph
  * @property {Array<RawNode>} nodes
  * @property {Array<RawEdge>} edges
  */
@@ -2942,8 +2957,10 @@ interface RawGraph<T = any, U = any> {
 /**
  *
  * @public
+ * @typedef {Node|NodeList|NodeId|Array<Node|NodeId>} NodeCollection
  *
  *
+ * @typedef {Edge|EdgeList|EdgeId|Array<Edge|EdgeId>} EdgeCollection
  *
  * @class Node
  * @property {boolean} isNode Read-only property that is always `true`.
@@ -2998,6 +3015,7 @@ declare type EdgeCollection<ED = any, ND = any> =
 /**
  * @public
  *
+ * @typedef {object} AdjacencyOptions
  * @property {"both"|"in"|"out"} [options.direction="both"] Direction of the edges to follow.
  * @property {Filter} [options.filter="visible"] Indicates what kind of elements should be retrieved.
  * @property {"union"|"include-sources"|"exclude-sources"} [options.policy="union"]
@@ -3016,6 +3034,7 @@ interface AdjacencyOptions {
 }
 /**
  * @public
+ * @typedef {"linear"|"quadraticIn"|"quadraticOut"|"quadraticInOut"|"cubicIn"|"cubicOut"|"cubicInOut"|function(x: number): number} EasingFunction
  */
 declare type Easing =
   | 'linear'
@@ -3061,6 +3080,7 @@ interface RenderStateInfo {
 }
 /**
  * @public
+ * @typedef {object|number} AttributeAnimationOptions If a number is specified,
  * it specifies the `duration` property.
  * @param {number}  [duration=0]      Indicates the duration of the attribute
  * transition, in milliseconds.
@@ -3075,6 +3095,7 @@ declare type AttributeAnimationOptions =
 declare type CrossOriginValue = 'anonymous' | 'use-credentials' | null;
 /**
  * @public
+ * @typedef {number|string} PixelSize
  * Indicates a size in pixels. A string in the format `X%` (e.g "200%") can be
  * specified instead of a number, in which case it is treated as `X percent of
  * the default value`. `X` should be parsable using `parseFloat`.
@@ -3082,39 +3103,48 @@ declare type CrossOriginValue = 'anonymous' | 'use-credentials' | null;
 declare type PixelSize = number | string;
 /**
  * @public
+ * @typedef {null|string} Color CSS color name (e.g `"red"`), `"transparent"`,
  * rgb(a) notation (e.g: `"rgb(128, 128, 128)"` or `"rgba(128, 128, 128, 0.2)"`),
  * hexadecimal notation (e.g: `"#FFFFFF"`) or `null` (transparent).
  */
 declare type Color = string | null;
 /**
  * @public
+ * @typedef {string|number|null} TextContent
  */
 declare type TextContent = string | number | null;
 /**
  * @public
+ * @typedef {"normal"|"bold"|"italic"} FontStyle
  */
 declare type FontStyle = 'none' | 'bold' | 'italic' | 'normal';
 /**
  * @public
+ * @typedef {"left"|"center"} TextAlign
  */
 declare type TextAlign = 'left' | 'center';
 /**
  * @public
+ * @typedef {"shifted"|"centered"} EdgeTextPosition
  */
 declare type EdgeTextPosition = 'shifted' | 'centered';
 /**
  * @public
+ * @typedef {'right' | 'left' | 'top' | 'bottom' | 'center'} TextPosition
  */
 declare type TextPosition = 'right' | 'left' | 'top' | 'bottom' | 'center';
 /**
  * @public
+ * @typedef {"scaled"|"fixed"} ScalingMethod
  */
 declare type ScalingMethod = 'scaled' | 'fixed';
 /**
  * @public
+ * @typedef {number} LayerValue Integer between -1 and 3 (included). By default
  * elements are on the layer 0. Selected elements are on the layer 2. Hovered
  * elements are on the layer 3.
  *
+ * @typedef {number} OpacityValue Value between 0 (transparent) and 1 (opaque)
  * indicating the opacity of the node/edge. Note that Ogma doesn't perform real
  * opacity, but background blending: the lower the opacity value is, the more
  * the color of the node/edge is blended towards the background color, but it
@@ -3128,18 +3158,21 @@ declare type LayerValue = number;
 declare type OpacityValue = number;
 /**
  * @public
+ * @typedef {null|function(node: Node): boolean} NodeSelector
  * Used to indicate if a style rule should be applied to a given node. `null`
  * is equivalent to a function that always returns true.
  */
 declare type NodeSelector<ND, ED> = (node: Node$1<ND, ED>) => boolean | null;
 /**
  * @public
+ * @typedef {null|function(edge: Edge): boolean} EdgeSelector
  * Used to indicate if a style rule should be applied to a given edge. `null`
  * is equivalent to a function that always returns true.
  */
 declare type EdgeSelector<ED, ND> = (edge: Edge<ED, ND>) => boolean | null;
 /**
  * @public
+ * @typedef {object|true} Dependency `true` indicates that the rule/class
  * depends on the existence of the node(s)/edge(s), but not on their attributes
  * @property {"all"|Array<PropertyPath>} [attributes] List of attributes the
  * rule/class depends on
@@ -3160,6 +3193,7 @@ declare type Dependency =
     };
 /**
  * @public
+ * @typedef {object|null} NodeDependencies
  * If `null`, indicates that the node attributes defined by the rule/class does
  * not depend on any attribute of any node/edge.
  * If unspecified, the `self`, `adjacentNodes` and `adjacentEdges` fields are
@@ -3187,6 +3221,7 @@ interface NodeDependencies {
 }
 /**
  * @public
+ * @typedef {object|null} EdgeDependencies
  * If `null`, indicates that the edge attributes defined by the rule/class does
  * not depend on any attribute of any node/edge.
  * If unspecified, the `self`, `extremities` and `parallelEdges` fields are
@@ -3214,6 +3249,7 @@ interface EdgeDependencies {
 }
 /**
  * @public
+ * @typedef {object|null} NodeOutput
  * If unspecified, the assigned attributes are inferred to the best possible
  * extent from the `NodeAttributesValue` value.
  * @property {"all"|Array<PropertyPath>} [attributes] List of node attributes
@@ -3224,6 +3260,7 @@ declare type NodeOutput = null | {
 };
 /**
  * @public
+ * @typedef {object|null} EdgeOutput
  * If unspecified, the assigned attributes are inferred to the best possible
  * extent from the `EdgeAttributesValue` value.
  * @property {"all"|Array<PropertyPath>} [attributes] List of edge attributes
@@ -3317,6 +3354,7 @@ interface PulseOptions {
 
 /**
  * @public
+ * @typedef  {object} BoundingBox
  * @property {number} minX          Minimum X coordinate of the bounding box
  * @property {number} maxX          Maximum X coordinate of the bounding box
  * @property {number} minY          Minimum Y coordinate of the bounding box
@@ -3333,8 +3371,17 @@ interface PulseOptions {
  * sizes to compute the real boundaries at the selected zoom level
  */
 /**
- *
  * @public
+ * Same as <code>BoundingBox</code> but without the min/max node size data
+ * @typedef  {object} SimpleBoundingBox
+ * @property {number} minX          Minimum X coordinate of the bounding box
+ * @property {number} maxX          Maximum X coordinate of the bounding box
+ * @property {number} minY          Minimum Y coordinate of the bounding box
+ * @property {number} maxY          Maximum Y coordinate of the bounding box
+ * @property {number} cx            X coordinate of the center of the bounding box
+ * @property {number} cy            Y coordinate of the center of the bounding box
+ * @property {number} width         Width of the bounding box
+ * @property {number} height        Height of the bounding box
  */
 interface SimpleBoundingBox {
   minX: number;
@@ -3404,7 +3451,9 @@ declare type CursorStyle =
 
 /**
  * @public
+ * @typedef {string} KeyName Lowercase letter (e.g `"a"`), digit (e.g `"3"`) or
  * `"shift"|"ctrl"|"cmd"|"alt"|"space"|"enter"|"esc"|"del"|"backspace"`.
+ * @typedef {number} KeyCode JavaScript key code.
  */
 declare type ModifierKey =
   | 'shift'
@@ -3511,6 +3560,7 @@ interface Options {
 }
 /**
  * @public
+ * @typedef {object} ZoomLevelData
  * @property {number} smallestNodeSize Diameter of the smallest node (graph space)
  * @property {number} biggestNodeSize Diameter of the biggest node (graph space)
  * @property {number} graphWidth Width of the graph (graph space)
@@ -3529,6 +3579,7 @@ interface ZoomLevelData {
 
 /**
  * @public
+ * @typedef  {object}             LocateOptions
  * @property {number}             [duration=0]              Duration of the camera movement, in milliseconds.
  * @property {EasingFunction}     [easing="quadraticInOut"] Easing function applied to the movement of the camera.
  * @property {boolean}            [ignoreZoomLimits=false]  If `true`, the options `interactions.zoom.minValue` and
@@ -3558,6 +3609,7 @@ interface LocateOptions {
 }
 /**
  * @public
+ * @typedef {function(params: ZoomLevelData): number} ZoomBoundaryFunction
  * This type of functions is passed to the Ogma options to define how to treat
  * the interactive zoom level depending on the node size range, graph extent
  * and the canvas size.
@@ -3611,11 +3663,13 @@ declare type ZoomBoundaryFunction = (params: ZoomLevelData) => number;
  */
 /**
  * @public
+ * @typedef {object} View
  * @property {number} x
  * @property {number} y
  * @property {number} zoom
  * @property {number} angle
  *
+ * @typedef {object} CameraAnimationOptions
  * @property {number} [duration=0] Duration of the animation, in milliseconds.
  * @property {EasingFunction} [easing="linear"] Easing used by the animation.
  * @property {boolean} [ignoreZoomLimits=false]
@@ -3836,6 +3890,21 @@ declare class ViewAPI<ND, ED> extends APIModule<ND, ED> {
    */
   getElementAt: (pos: Point) => Node$1<ND, ED> | Edge<ED, ND> | null;
   /**
+   * @method Ogma.view.getElementsInView
+   * Returns the element currently visible in the viewport
+   * @return {{ nodes: NodeList, edges: EdgeList }}
+   */
+  getElementsInView: () => {
+    nodes: NodeList<ND, ED>;
+    edges: EdgeList<ED, ND>;
+  };
+  /**
+   * @method Ogma.view.getBounds
+   * Returns the bounds of the current view.
+   * @returns {SimpleBoundingBox}
+   */
+  getBounds: () => Required<SimpleBoundingBox>;
+  /**
    * @method Ogma.view.getElementsInside
    * Returns elements inside of the rectangle defined by the screen coordinates.
    * @param {number} xmin X coordinate of the bottom left corner
@@ -3874,7 +3943,7 @@ declare class ViewAPI<ND, ED> extends APIModule<ND, ED> {
    * @param {boolean} value `true` to enable the full screen mode, `false` to disable it.
    * @return {Promise<void>}
    * @example
-   * ogma.events.onKeyPress('f', function () {
+   * ogma.events.onKeyPress('f',  () => {
    *   ogma.view.setFullScreen(!ogma.view.isFullScreen());
    * });
    */
@@ -3942,7 +4011,7 @@ declare class ViewAPI<ND, ED> extends APIModule<ND, ED> {
    * @example
    * // We center the camera where the graph will be when added to Ogma,
    * // and then we add the graph progressively.
-   * ogma.parse.gexfFromUrl('graphs/myBigGraph.gexf').then(function (graph) {
+   * Ogma.parse.gexfFromUrl('graphs/myBigGraph.gexf').then(function (graph) {
    *   ogma.view.locateRawGraph(graph);
    *   ogma.setGraph(graph, {batchSize: 1000});
    * });
@@ -3966,6 +4035,11 @@ declare class ViewAPI<ND, ED> extends APIModule<ND, ED> {
   animationInProgress: () => boolean;
 }
 
+interface TransformationOptions {
+  duration?: number;
+  enabled?: boolean;
+}
+
 declare enum TransformationType {
   NodeFilter = 'node-filter',
   EdgeFilter = 'edge-filter',
@@ -3980,26 +4054,15 @@ declare enum TransformationType {
 }
 
 declare type TransformationId = number;
-interface TransformationContext<ND, ED> {
-  virtualNodes: NodeList<ND, ED>;
-  virtualEdges: EdgeList<ED, ND>;
-}
 /**
  * @public
  * Control handle for the transformation.
  * @class Transformation
  */
 declare class Transformation<ND = any, ED = any> {
-  private _removalDuration;
-  private _error;
-  private _resolveFunction;
-  private _rejectFunction;
-  protected _id: TransformationId;
-  protected _duration: number;
-  protected _context: TransformationContext<ND, ED>;
-  protected _ogma: Ogma<ND, ED>;
   shouldDo: boolean;
   shouldUndo: boolean;
+  destroyed: boolean;
   /**
    * @method Transformation.getName
    * Returns the name of the transformation.
@@ -4030,14 +4093,14 @@ declare class Transformation<ND = any, ED = any> {
    * @param {number} [duration=0] Animation duration in ms
    * @returns {Promise<void>}
    */
-  enable(duration: number): Promise<void>;
+  enable(duration?: number): Promise<void>;
   /**
    * @method Transformation.disable
    * Disable the transformation over the specified amount of time.
    * @param {number} [duration=0] Animation duration in ms
    * @returns {Promise<void>}
    */
-  disable(duration: number): Promise<void>;
+  disable(duration?: number): Promise<void>;
   /**
    * @method Transformation.toggle
    * Toggle the transformation over the specified amount of time.
@@ -4060,6 +4123,14 @@ declare class Transformation<ND = any, ED = any> {
    */
   setIndex(index: any): Promise<this>;
   /**
+   * @method Transformation.setOptions
+   * Set the index of the transformation in the pipeline. The transformation with the lower index is applied first,
+   * the one with the higher index is applied last.
+   * @param index
+   * @returns {Promise<void>}
+   */
+  setOptions(options: TransformationOptions): Promise<this>;
+  /**
    * @method Transformation.destroy
    * Remove the transformation over the specified amount of time. After this methods is called,
    * the transformation is not manipulable anymore (cannot be enabled again for example).
@@ -4079,6 +4150,7 @@ declare class Transformation<ND = any, ED = any> {
 
 /**
  * @public
+ * @typedef {object} SubGraph
  * @property {NodeList} [object.nodes] Nodes of the subgraph.
  * @property {EdgeList} [object.edges] Edges of the subgraph.
  */
@@ -4229,10 +4301,7 @@ interface ItemList<CurrentDataType = any> {
 }
 
 declare class EdgeList<ED = any, ND = any> implements ItemList<ED> {
-  // TODO: fix it
-  // readonly isNode = false;
-  readonly isNode: boolean;
-
+  readonly isNode;
   constructor(indexes: ItemListIndexes, ogma: Ogma);
   get size(): number;
   /**
@@ -4396,11 +4465,31 @@ declare class EdgeList<ED = any, ND = any> implements ItemList<ED> {
    * @return {Edge}
    */
   get(index: number): Edge<ED, ND>;
+  /**
+   * @method EdgeList.forEach
+   * @param {function(edge: Edge, index: number)} callback
+   */
   forEach(callback: (edge: Edge<ED, ND>, index: number) => void): void;
+  /**
+   * @method EdgeList.map
+   * @param {function(edge: Edge, index: number): any} callback
+   * @return {Array<any>}
+   */
   map<U>(callback: (edge: Edge<ED, ND>, index: number) => U): U[];
+  /**
+   * @method EdgeList.filter
+   * @param {function(edge: Edge, index: number): boolean} callback
+   * @return {EdgeList}
+   */
   filter(
     callback: (edge: Edge<ED, ND>, index: number) => unknown
   ): EdgeList<ED, ND>;
+  /**
+   * @method EdgeList.reduce
+   * @param {function(accumulator: any, currentValue: Edge, index: number): any} callback
+   * @param {any} initialValue
+   * @return {any}
+   */
   reduce(
     callbackfn: (
       previousValue: ED,
@@ -4417,6 +4506,11 @@ declare class EdgeList<ED = any, ND = any> implements ItemList<ED> {
     ) => U,
     initialValue: U
   ): U;
+  /**
+   * @method EdgeList.concat
+   * @param {EdgeList} edges
+   * @return {EdgeList}
+   */
   concat(edges: EdgeList<ED, ND>): EdgeList<ED, ND>;
   /**
    * @method EdgeList.dedupe
@@ -4425,7 +4519,10 @@ declare class EdgeList<ED = any, ND = any> implements ItemList<ED> {
    */
   dedupe(): EdgeList<ED, ND>;
   /**
+   * @method EdgeList.subtract
+   * @param {EdgeList} [list]
    * Returns a new EdgeList which does not contain any element from list
+   * @return {EdgeList}
    */
   subtract(list: EdgeList): EdgeList;
   /**
@@ -4461,7 +4558,8 @@ declare class EdgeList<ED = any, ND = any> implements ItemList<ED> {
    */
   toJSON(options?: EdgeJSONOptions): RawEdge<ED>[];
   /**
-   * @param active whether to select or unselect the edges.
+   * @method EdgeList.setSelected
+   * @param {boolean|Array<boolean>} active whether to select or unselect the edges.
    */
   setSelected(active: boolean | boolean[]): void;
   /**
@@ -4648,8 +4746,9 @@ declare class EdgeList<ED = any, ND = any> implements ItemList<ED> {
    * @param {number} [options.width=10]                             Width of the pulse in pixels
    * @param {number} [options.startRatio=1]                         Where the pulse starts, relative to the edge siz (1 = at the edge's border)
    * @param {number} [options.endRatio=2]                           Where the pulse ends, relative to the edge siz (1 = at the edge's border)
+   * @returns {Promise<EdgeList>}
    */
-  pulse(options?: PulseOptions): void;
+  pulse(options?: PulseOptions): Promise<EdgeList>;
 }
 
 declare type BrandPosition =
@@ -4659,6 +4758,7 @@ declare type BrandPosition =
   | 'bottom-right';
 /**
  * @public
+ * @typedef {object} BrandOptions
  * @property {"top-left"|"top-right"|"bottom-left"|"bottom-right"} [position="bottom-right"] Indicates the position of the brand.
  * @property {number} [horizontalMargin=0] Indicates the space in pixels between the brand and the top/bottom of the screen (depending on the position)
  * @property {number} [verticalMargin=0] Indicates the space in pixels between the brand and the right/left of the screen (depending on the position)
@@ -4696,6 +4796,7 @@ declare class BrandAPI<ND, ED> extends APIModule<ND, ED> {
 
 /**
  * @public
+ * @typedef {Object} GeoCoordinate
  * @property {number} latitude Latitude (degrees)
  * @property {number} longitude Longitude (degrees)
  */
@@ -4705,6 +4806,7 @@ interface GeoCoordinate {
 }
 /**
  * @public
+ * @typedef {Object} MapPosition
  * @property {number} latitude Latitude (degrees)
  * @property {number} longitude Longitude (degrees)
  * @property {number} zoom      Map scale
@@ -4722,6 +4824,7 @@ interface BaseMapOptions {
 }
 /**
  * @public
+ * @typedef {Object} GeoModeOptions
  * @property {PropertyPath}  [latitudePath='latitude']    Node path which contains the latitude.
  * @property {PropertyPath}  [longitudePath='longitude']  Node path which contains the longitude.
  * @property {number}  [maxZoomLevel=20]            Maximum geo-spatial zoom.
@@ -4790,35 +4893,6 @@ interface GeoModeOptions {
   tiles?: L.Layer | BaseMapOptions;
   crs?: L.CRS;
 }
-/**
- * @module geo
- * Allows to display nodes which have geographical coordinates (latitude and longitude) on a map.
- *
- * This module adds two properties to nodes: `latitude` and `longitude`.
- * Valid values for geographical zooms can be found [here](http://wiki.openstreetmap.org/wiki/Zoom_levels).
- *
- * The projection model used is Spherical Mercator.
- *
- * @example Initializing a small graph
- *
- * var ogma = new Ogma({
- *   graph: {
- *     nodes: [
- *       {id: 'Paris', lat: 48.858838, long: 2.343436, size: 8},
- *       {id: 'London', lat: 51.509615, long: -0.134514, size: 10}
- *     ]
- *   });
- *
- * // Switch to geographical mode
- * ogma.geo.enable({
- *   latitudePath: 'lat',           // indicates that the latitude is located in the 'lat' property of nodes
- *   longitudePath: 'long',         // indicates that the longitude is located in the 'long' property of nodes
- *   tileUrlTemplate: 'http://{s}.myTileProvider.com/{z}/{x}/{y}.png' // indicates from which server the tiles must be retrieved
- * });
- *
- * @demo geo-mode
- * @demo geo-mode-providers
- */
 declare class GeoAPI<ND, ED> extends APIModule<ND, ED> {
   /**
    * @method Ogma.geo.enable
@@ -4995,15 +5069,9 @@ declare class GeoAPI<ND, ED> extends APIModule<ND, ED> {
 }
 
 declare class Node$1<ND = any, ED = any> implements Item<ND> {
-  // TODO: fix this
-  // readonly size = 1;
-  // readonly isNode = true;
-  // readonly isList = false;
-
-  readonly size: number;
-  readonly isNode: boolean;
-  readonly isList: boolean;
-
+  readonly size;
+  readonly isNode;
+  readonly isList;
   constructor(index: ItemIndex, ogma: Ogma);
   /**
    * @method Node.setAttributes
@@ -5145,6 +5213,7 @@ declare class Node$1<ND = any, ED = any> implements Item<ND> {
   fastGetAdjacentElements(): SubGraph<any, any>;
   /**
    * Returns weakly connected component to which the node belongs
+   * @method  Node.getConnectedComponent
    * @param {object} [options]
    * @param {Filter} [options.filter='visible']
    * @param {boolean} [options.returnIds=false] Return node ids instead of Nodes
@@ -5447,8 +5516,9 @@ declare class Node$1<ND = any, ED = any> implements Item<ND> {
    * @param {number} [options.width=50]                             Width of the pulse in pixels
    * @param {number} [options.startRatio=1]                         Where the pulse starts, relative to the node siz (1 = at the node's border)
    * @param {number} [options.endRatio=2]                           Where the pulse ends, relative to the node siz (1 = at the node's border)
+   * @returns {Promise<Node>}
    */
-  pulse(options?: PulseOptions): void;
+  pulse(options?: PulseOptions): Promise<Node$1>;
 }
 
 interface EdgeDirectionSetting {
@@ -5456,15 +5526,9 @@ interface EdgeDirectionSetting {
   filter: Filter;
 }
 declare class Edge<ED = any, ND = any> implements Item<ED> {
-  // TODO: fix this
-  // readonly size = 1;
-  // readonly isNode = false;
-  // readonly isList = false;
-
-  readonly size: number;
-  readonly isNode: boolean;
-  readonly isList: boolean;
-
+  readonly size;
+  readonly isNode;
+  readonly isList;
   constructor(index: ItemIndex, ogma: Ogma);
   /**
    * @method Edge.setAttributes
@@ -5805,14 +5869,13 @@ declare class Edge<ED = any, ND = any> implements Item<ED> {
      * @param {number} [options.width=10]                             Width of the pulse in pixels
      * @param {number} [options.startRatio=1]                         Where the pulse starts, relative to the edge siz (1 = at the edge's border)
      * @param {number} [options.endRatio=2]                           Where the pulse ends, relative to the edge siz (1 = at the edge's border)
+     * @returns {Promise<Edge>}
      */
-  pulse(options?: PulseOptions): void;
+  pulse(options?: PulseOptions): Promise<Edge>;
 }
 
 declare class NodeList<ND = any, ED = any> implements ItemList<ND> {
-  // TODO: fix this
-  // readonly isNode = true;
-  readonly isNode: boolean;
+  readonly isNode;
   constructor(indexes: ItemListIndexes, ogma: Ogma);
   get size(): number;
   /**
@@ -5991,11 +6054,31 @@ declare class NodeList<ND = any, ED = any> implements ItemList<ND> {
    * @return {Node}
    */
   get(index: number): Node$1<ND, ED>;
+  /**
+   * @method NodeList.forEach
+   * @param {function(node: Node, index: number)} callback
+   */
   forEach(callback: (node: Node$1<ND, ED>, index: number) => void): void;
+  /**
+   * @method NodeList.map
+   * @param {function(node: Node, index: number): any} callback
+   * @return {Array<any>}
+   */
   map<U>(callback: (node: Node$1<ND, ED>, index: number) => U): U[];
+  /**
+   * @method NodeList.filter
+   * @param {function(node: Node, index: number): boolean} callback
+   * @return {NodeList}
+   */
   filter(
     callback: (node: Node$1<ND, ED>, index: number) => unknown
   ): NodeList<ND, ED>;
+  /**
+   * @method NodeList.reduce
+   * @param {function(accumulator: any, currentValue: Node, index: number): any} callback
+   * @param {any} initialValue
+   * @return {any}
+   */
   reduce(
     callbackfn: (
       previousValue: ND,
@@ -6012,6 +6095,11 @@ declare class NodeList<ND = any, ED = any> implements ItemList<ND> {
     ) => U,
     initialValue: U
   ): U;
+  /**
+   * @method NodeList.concat
+   * @param {NodeList} nodes
+   * @return {NodeList}
+   */
   concat(nodes: NodeList<ND, ED>): NodeList<ND, ED>;
   /**
    * @method NodeList.dedupe
@@ -6020,7 +6108,10 @@ declare class NodeList<ND = any, ED = any> implements ItemList<ND> {
    */
   dedupe(): NodeList<ND, ED>;
   /**
+   * @method NodeList.subtract
+   * @param {NodeList} [list]
    * Returns a new NodeList which does not contain any element from list
+   * @return {NodeList}
    */
   subtract(list: NodeList<ND, ED>): NodeList<ND, ED>;
   /**
@@ -6046,7 +6137,8 @@ declare class NodeList<ND = any, ED = any> implements ItemList<ND> {
    */
   inverse(): NodeList<ND, ED>;
   /**
-   * @param fn sort function
+   * @method NodeList.sort
+   * @param {(a: Node, b: Node): number} fn sort function
    */
   sort(fn: (a: Node$1<ND, ED>, b: Node$1<ND, ED>) => number): NodeList<ND, ED>;
   /**
@@ -6315,8 +6407,9 @@ declare class NodeList<ND = any, ED = any> implements ItemList<ND> {
    * @param {number} [options.width=50]                             Width of the pulse in pixels
    * @param {number} [options.startRatio=1]                         Where the pulse starts, relative to the node siz (1 = at the node's border)
    * @param {number} [options.endRatio=2]                           Where the pulse ends, relative to the node siz (1 = at the node's border)
+   * @returns {Promise<NodeList>}
    */
-  pulse(options?: PulseOptions): void;
+  pulse(options?: PulseOptions): Promise<NodeList>;
 }
 
 interface AddItemOptions {
@@ -6589,6 +6682,7 @@ declare class GraphAPI<ND, ED> {
 
 /**
  * @public
+ * @typedef {object} TraversalOptions
  * @property {Node<ND,ED>|NodeId} root Traversal root - the node from which the traversal should start.
  * @property {(node: Node<ND, ED>) => void | boolean} onNode Node callback. Called for each node in the traversal. If you return `true`, the traversal is stopped, understanding that you have found what you were looking for.
  * @property {(edge: Edge<ED, ND>) => void | boolean} [onEdge] Edge callback. Called for each edge in the traversal. If you return `false`, the edge will not be followed.
@@ -6760,6 +6854,9 @@ declare class AlgorithmsAPI<ND, ED> extends APIModule<ND, ED> {
 
 /**
  * @public
+ * @typedef {"left"|"right"|"middle"} MouseButton Identifies a mouse button.
+ * @typedef {"mouse"|"touch"} InputSource         Indicates what kind of source emitted the event.
+ * @typedef {Node|Edge|null} InputTarget          Element that is clicked/hovered. If it's not `null`, you can check
  * if it's a node or an edge with their `isNode` property.
  */
 declare type MouseButton = 'left' | 'right' | 'middle';
@@ -6826,6 +6923,7 @@ declare enum MovementType {
 
 /**
  * @public
+ * @typedef {object} NodeStyleRuleDefinition
  * @property {NodeAttributesValue} [options.nodeAttributes]
  * @property {EdgeAttributesValue} [options.edgeAttributes]
  * @property {NodeSelector}        [options.nodeSelector]
@@ -7000,7 +7098,7 @@ interface NodesDragEvent<ND, ED> {
 interface DomEvent {
   domEvent: Event;
 }
-interface KeyboardEvent {
+interface WrappedKeyboardEvent {
   domEvent: KeyboardEvent;
   key: number;
   code: number;
@@ -7289,8 +7387,26 @@ interface EventTypes<ND, ED> {
    */
   mousewheel: MouseWheelEvent<ND, ED>;
   mousewheelInternal: WheelEvent;
-  keyup: KeyboardEvent;
-  keydown: KeyboardEvent;
+  /**
+   * @public
+   * @event keyup
+   * Event triggered when the user releases the keyboard button.
+   *
+   * @property {KeyboardEvent} domEvent
+   * @property {number} keyCode
+   * @property {string} key
+   */
+  keyup: WrappedKeyboardEvent;
+  /**
+   * @public
+   * @event keydown
+   * Event triggered when the user presses the keyboard button.
+   *
+   * @property {KeyboardEvent} domEvent
+   * @property {number} keyCode
+   * @property {string} key
+   */
+  keydown: WrappedKeyboardEvent;
   /**
    * @public
    * @event dragStart
@@ -7490,15 +7606,15 @@ interface EventTypes<ND, ED> {
    */
   updateEdgeData: EdgesDataEvent<any>;
   /**
-   * @event startZoom
+   * @event zoomStart
    * Triggered when camera starts zoom.
    * @property
    * @property  {number} duration
    * @property  {Easing} easing
-   * @property  {number} startZoom
-   * @property  {number} endZoom
+   * @property  {number} startZoom Zoom level at the start of the zoom.
+   * @property  {number} endZoom Target zoom leve
    */
-  startZoom: StartZoomEvent;
+  zoomStart: StartZoomEvent;
   /**
    * @public
    * @event viewChanged
@@ -7512,15 +7628,30 @@ interface EventTypes<ND, ED> {
    * ogma.view.setZoom(5);
    */
   viewChanged: ViewChangedEvent;
-  cameraMove: EmptyEvent;
-  cameraRotate: EmptyEvent;
-  cameraPan: EmptyEvent;
   /**
    * @public
-   * @event cameraZoom
+   * @event move
+   * Event triggered when camera is moving.
+   */
+  move: EmptyEvent;
+  /**
+   * @public
+   * @event rotate
+   * Event triggered when camera is moving.
+   */
+  rotate: EmptyEvent;
+  /**
+   * @public
+   * @event pan
+   * Event triggered when viewport panning animation is in progress
+   */
+  pan: EmptyEvent;
+  /**
+   * @public
+   * @event zoom
    * Event triggered when zoom animation is in progress
    */
-  cameraZoom: EmptyEvent;
+  zoom: EmptyEvent;
   /**
    * @public
    * @event nodesDragStart
@@ -7876,7 +8007,6 @@ declare class EventsAPI<ND, ED> extends APIModule<ND, ED> {
    */
   onBeforeNodesRemoved: (listener: TypedListener<NodesEvent<ND, ED>>) => Ogma;
   /**
-   * @deprecated
    * @deprecated
    * @method Ogma.events.onNodesRemoved DEPRECATED: see [#Event:-removeNodes](#Event:-removeNodes) DEPRECATED see [#Event:-](#Event:-)
    * Triggers the specified function when some nodes are removed from the graph.
@@ -8519,6 +8649,7 @@ interface JSONExportOptions extends ExportOptions {
 
 /**
  * @public
+ * @typedef {object}  LegendOptions
  * @property {"bottom"|"top"|"left"|"right"} [position="bottom"] Position of the legend on the canvas.
  * @property {number} [widgetWidth=130] Width of a widget, in pixels
  * @property {string} [fontFamily="Arial"] Font used to display the widgets
@@ -8637,6 +8768,7 @@ declare class LegendAPI<ND, ED> extends APIModule<ND, ED> {
 
 /**
  * @public
+ * @typedef  {object}           ImageExportOptions
  * @property {boolean}          [clip=false] If `true`, export the current view rather than the whole graph
  * @property {number}           [width] If not specified, the width of the canvas will be used.
  * @property {number}           [height] If not specified, the height of the canvas will be used.
@@ -9245,6 +9377,7 @@ declare class GeneratorsAPI<ND, ED> extends APIModule<ND, ED> {
  */
 /**
  * @public
+ * @typedef {object} NodeAttributesValue Object following the same structure as [`NodeAttributes`](#NodeAttributes),
  * with the addition that each property can be replaced by a function that return a value for this property (or an object
  * if the property has multiple nested sub-properties). `undefined` can be explicitly specified in any field to indicate that
  * the attribute should not be modified (useful when updating a class/rule).
@@ -9290,16 +9423,21 @@ declare class GeneratorsAPI<ND, ED> extends APIModule<ND, ED> {
  *     }
  *   }
  * });
+ * @typedef {object} EdgeAttributesValue Object following the same structure as
  * [`EdgeAttributes`](#EdgeAttributes), with the addition that each property can
  * be replaced by a function that return a value for this property (or an object
  * if the property has multiple nested sub-properties).
  * When working with a large number of nodes/edges, avoid as much as possible the usage of functions.
  *
+ * @typedef {"linear"|"quadraticIn"|"quadraticOut"|"quadraticInOut"|"cubicIn"|"cubicOut"|"cubicInOut"} Easing
+ * @typedef {"webgl"|"canvas"|"svg"|null} RendererType
+ * @typedef {"requested"|"ok"|"error"} RendererState
  * Indicates a renderer state. <br>
  * <code>"requested"</code> is fired right after Ogma is initialized or the `renderer` option has been changed, and means that the
  * renderer has not been initialized yet. <br>
  * <code>"ok"</code> indicates that the renderer has been initialized and runs properly. <br>
  * <code>"error"</code> indicates that an error has occurred that prevents the renderer from running.
+ * @typedef {"NO_WEBGL"|"NO_ANGLE_INSTANCED_ARRAYS"|"OTHER"|null} RendererErrorCode
  * A non-null value indicates that an error has occurred and provides information on that error. <br>
  * <code>"NO_WEBGL"</code> indicates that WebGL is not available, most likely a browser or GPU issue. <br>
  * <code>"NO_ANGLE_INSTANCED_ARRAYS</code>" indicates that the
@@ -9308,6 +9446,7 @@ declare class GeneratorsAPI<ND, ED> extends APIModule<ND, ED> {
  * <code>"OTHER"</code> indicates an unexpected error, most likely due to a specific combination of browser/GPU/OS that was not
  * handled correctly by Ogma. If you happen to encounter this error code , please contact support@linkurio.us and
  * provide the error message along with the browser, operating system and graphics card used.
+ * @typedef {"anonymous"|"use-credentials"|null} CrossOriginValue
  */
 declare class GraphicsAPI<ND, ED> {
   /**
@@ -9323,37 +9462,40 @@ declare class GraphicsAPI<ND, ED> {
 
 declare class ImportsAPI<ND, ED> extends APIModule<ND, ED> {
   /**
+   * @deprecated
    * @method Ogma.parse.gexf
-   * Parse a GEXF string and return the raw graph.
+   *
+   * Parse a GEXF string and return the raw graph. Use `Ogma.parse.gexfFromUrl` instead.
+   *
    * @param {string} content
    * @return {Promise<RawGraph>}
-   *
    * @example
    * fetch(url)
    *   .then((response) => response.text())
-   *   .then((gexfString) => ogma.parse.gexf(gexfString))
+   *   .then((gexfString) => Ogma.parse.gexf(gexfString))
    *   .then((graph) => ogma.setGraph(graph));
    */
-  gexf: (content: string) => Promise<RawGraph>;
+  gexf: (content: string) => Promise<RawGraph<ND, ED>>;
   /**
+   * @deprecated
    * @method Ogma.parse.gexfFromUrl
-   * Fetch and parse a GEXF file and return the raw graph.
+   * Fetch and parse a GEXF file and return the raw graph. Use `Ogma.parse.gexfFromUrl` instead.
+   *
    * @param {string} url
    * @return {Promise<RawGraph>}
-   *
    * @example
    * // same as the example above, but shorter
-   * ogma.parse.gexfFromUrl(url).then(function(graph) {
+   * Ogma.parse.gexfFromUrl(url).then(function(graph) {
    *   ogma.setGraph(graph);
    * });
    */
   gexfFromUrl: (url: string) => Promise<RawGraph>;
   /**
+   * @deprecated
    * @method Ogma.parse.janus
-   * Parse the result of a JanusGraph query into an Ogma graph.
+   * Parse the result of a JanusGraph query into an Ogma graph. Use `Ogma.parse.janus` instead.
    * @param {object} content Response of the gremlin-client library ("gremlin-client")
    * @return {Promise<RawGraph>}
-   *
    * @example
    * // Use the gremlin-client library to create a session
    * var client = Gremlin.createClient(8182, 'localhost', {});
@@ -9365,22 +9507,23 @@ declare class ImportsAPI<ND, ED> extends APIModule<ND, ED> {
    *     console.log('Gremlin query error: ' + error.message);
    *   }
    *
-   *   var rawGraph = ogma.parse.janus(res);
+   *   var rawGraph = Ogma.parse.janus(res);
    *   return ogma.setGraph(rawGraph);
    * });
    */
   janus: (content: string) => Promise<RawGraph>;
   /**
+   * @deprecated
    * @method Ogma.parse.json
-   * Parse a JSON string and return the raw graph.
+   * Parse a JSON string and return the raw graph. Use `Ogma.parse.json` instead.
    * @param {string} content
    * @param {function(json: Object | unknown[]): RawGraph} [transform] Function
    * to transform custom JSON format into Ogma's `RawGraph`
    * @return {Promise<RawGraph>}
-   *
+   * @deprecated
    * @example
    * ogma.exports.json({download: false)})
-   *   .then((jsonString) => ogma.parse.json(jsonString))
+   *   .then((jsonString) => Ogma.parse.json(jsonString))
    *   .then((graph) => ogma.setGraph(graph))
    *   .then(() => ogma.view.locateGraph());
    */
@@ -9393,13 +9536,15 @@ declare class ImportsAPI<ND, ED> extends APIModule<ND, ED> {
       | undefined
   ) => Promise<RawGraph<NodeData, EdgeData>>;
   /**
+   * @deprecated
    * @method Ogma.parse.jsonFromUrl
-   * Fetch and parse a JSON file and return the raw graph.
+   *
+   * Fetch and parse a JSON file and return the raw graph. Use `Ogma.parse.jsonFromUrl` instead.
    * @param {string} url
    * @param {function(json: Object | unknown[]): RawGraph} [transform] Function
    * to transform custom JSON format into Ogma's `RawGraph`
    * @return {Promise<RawGraph>}
-   *
+   * @deprecated Use `Ogma.parse.jsonFromUrl` instead.
    * @example
    * // here, the input graph has a different format to represent edges:
    * // { links: [{ from: NodeId, to: NodeId}], nodes: [{ id: NodeId }] };
@@ -9416,7 +9561,7 @@ declare class ImportsAPI<ND, ED> extends APIModule<ND, ED> {
    * }
    *
    * // passing the custom transformation function
-   * ogma.parse.jsonFromUrl(url, transform).then(function(graph) {
+   * Ogma.parse.jsonFromUrl(url, transform).then(function(graph) {
    *   ogma.setGraph(graph);
    * });
    */
@@ -9429,8 +9574,9 @@ declare class ImportsAPI<ND, ED> extends APIModule<ND, ED> {
       | undefined
   ) => Promise<RawGraph<NodeData, EdgeData>>;
   /**
+   * @deprecated
    * @method Ogma.parse.neo4j
-   * Parse the result of a Neo4J query into an Ogma graph.
+   * Parse the result of a Neo4J query into an Ogma graph. Use `Ogma.parse.neo4j` instead.
    *
    * The parsed user's data will be stored into each Ogma item "data" field with the following structure:
    *
@@ -9439,9 +9585,10 @@ declare class ImportsAPI<ND, ED> extends APIModule<ND, ED> {
    * ● `neo4jLabels` field for Neo4j node labels information,
    *
    * ● `neo4jType` field for Neo4j edge types;
+   *
    * @param {object} content Response of the Neo4j Bolt driver ("neo4j-javascript-driver")
    * @return {Promise<RawGraph>}
-   *
+   * @deprecated Use `Ogma.parse.neo4j` instead.
    * @example
    * // Use the neo4j-javascript-driver to create a session
    * // Refer to the neo4j-javascript-driver documentation for more information
@@ -9452,7 +9599,7 @@ declare class ImportsAPI<ND, ED> extends APIModule<ND, ED> {
    * session
    *   .run('MATCH (n) OPTIONAL MATCH (n)-[r]-() RETURN n,r LIMIT 100')
    *   // Parse the response into an Ogma graph
-   *   .then((response) => ogma.parse.neo4j(response))
+   *   .then((response) => Ogma.parse.neo4j(response))
    *   // Load this graph
    *   .then((graph) => ogma.setGraph(graph))
    *   .then(() => {
@@ -9467,10 +9614,44 @@ declare class ImportsAPI<ND, ED> extends APIModule<ND, ED> {
     content: object | string
   ) => Promise<RawGraph<ND_1, ED_1>>;
 }
+declare const staticMethods: {
+  json: <NodeData = unknown, EdgeData = unknown>(
+    content: string,
+    transform?:
+      | ((
+          json: Record<string, any> | unknown[]
+        ) => RawGraph<NodeData, EdgeData>)
+      | undefined
+  ) => Promise<RawGraph<NodeData, EdgeData>>;
+  jsonFromUrl: <NodeData_1 = unknown, EdgeData_1 = unknown>(
+    url: string,
+    transform?:
+      | ((
+          json: Record<string, any> | unknown[]
+        ) => RawGraph<NodeData_1, EdgeData_1>)
+      | undefined
+  ) => Promise<RawGraph<NodeData_1, EdgeData_1>>;
+  gexf: <ND = unknown, ED = unknown>(
+    content: string
+  ) => Promise<RawGraph<ND, ED>>;
+  gexfFromUrl: <ND_1 = unknown, ED_1 = unknown>(
+    url: string
+  ) => Promise<RawGraph<ND_1, ED_1>>;
+  janus: <ND_2 = unknown, ED_2 = unknown>(
+    content: string
+  ) => Promise<RawGraph<ND_2, ED_2>>;
+  neo4j: <
+    ND_3 extends Neo4JNodeData<Record<string, unknown>>,
+    ED_3 extends Neo4JEdgeData<Record<string, unknown>>
+  >(
+    content: object | string
+  ) => Promise<RawGraph<ND_3, ED_3>>;
+};
 
 /**
  * @public
  * Generic layout options.
+ * @typedef {object} LayoutOptions
  * @param {NodeId[]|NodeList} [nodes]  List of affected nodes. If nothing provided, the whole graph will be used. Where edges param is available and provided, then this list will be augmented with reached nodes from the passed edge list.
  * @param {number}           [duration]     Duration of the animation when the graph is updated
  * @param {boolean}          [skipTextDrawing=true] Skip drawing labels during the layout. Improves performance and user experience.
@@ -10140,6 +10321,7 @@ declare class SelectionAPI<ND, ED> {
 
 /**
  * @public
+ * @typedef {object} Options
  * @property {object} [interactions]
  */
 /**
@@ -10164,6 +10346,7 @@ declare class SettingsAPI<ND, ED> {
 
 /**
  * @public
+ * @typedef {object} StyleClassDefinition
  * @property {NodeAttributesValue} [options.nodeAttributes]
  * @property {EdgeAttributesValue} [options.edgeAttributes]
  * @property {NodeDependencies}    [options.nodeDependencies]
@@ -10309,7 +10492,7 @@ interface ClassOptions<ND, ED> {
   nodeOutput?: NodeOutput;
   edgeOutput?: EdgeOutput;
 }
-interface theme {
+interface Theme {
   nodeAttributes: NodeAttributes;
   edgeAttributes: EdgeAttributes;
   selectedNodeAttributes: NodeAttributes;
@@ -10648,7 +10831,7 @@ declare class StylesAPI<ND, ED> extends APIModule<ND, ED> {
     selectedEdgeAttributes,
     hoveredNodeAttributes,
     hoveredEdgeAttributes
-  }: theme) => void;
+  }: Theme) => void;
 }
 
 declare class ClassesAPI<ND, ED> {
@@ -10816,6 +10999,7 @@ declare class ObjectPropertyWatcher {
 
 /**
  * @public
+ * @typedef {object|PropertyPath} WatcherOptions
  * If a string or array is specified, it indicates the `path` property.
  * @property {PropertyPath} [path] Path of the data property to watch. If not specified, watch the root property.
  * @property {"visible"|"all"} [filter="visible"] Indicates which elements the watcher takes into account. If "visible" (default),
@@ -11198,6 +11382,7 @@ declare type TooltipPosition =
   | 'cssDefined';
 /**
  * @public
+ * @typedef {object} TooltipOptions
  * @property {"top"|"bottom"|"left"|"right"|"cssDefined"} [options.position="top"] Position of the tooltip relative to
  * the mouse. If "cssDefined" is specified, the tooltip will only be added to the graph container without
  * positioning it.
@@ -11366,13 +11551,12 @@ declare class ToolsAPI<ND, ED> extends APIModule<ND, ED> {
   brand: BrandAPI<ND, ED>;
 }
 
-interface TransformationOptions {
-  duration?: number;
-  enabled?: boolean;
-}
-
-declare type NodeGroupIdGenerator<ND, ED> = (node: Node$1<ND, ED>) => string;
-declare type EdgeGroupIdGenerator<ED, ND> = (edge: Edge<ED, ND>) => string;
+declare type NodeGroupIdGenerator<ND, ED> = (
+  node: Node$1<ND, ED>
+) => string | undefined;
+declare type EdgeGroupIdGenerator<ED, ND> = (
+  edge: Edge<ED, ND>
+) => string | undefined;
 declare type NodeGroupGenerator<ND, ED> = (
   nodes: NodeList<ND, ED>,
   groupId: string,
@@ -11386,6 +11570,7 @@ declare type EdgeGroupGenerator<ED, ND> = (
 /**
  * @public
  *
+ * @typedef {object} NodeDataAndAttributes
  * @property {NodeId} [id]
  * @property {any} [data]
  * @property {NodeAttributes} [attributes]
@@ -11397,6 +11582,7 @@ interface NodeDataAndAttributes {
 }
 /**
  * @public
+ * @typedef {object} EdgeDataAndAttributes
  * @property {EdgeId} [id]
  * @property {any} [data]
  * @property {EdgeAttributes} [attributes]
@@ -11535,71 +11721,35 @@ interface NodeClusteringOptions<ND, ED> extends TransformationOptions {
  * trigger an update will only result in one single update.
  */
 declare class TransformationAPI<ND, ED> extends APIModule<ND, ED> {
-  /**
-   * @method Ogma.transformations.addNodeGrouping
-   */
   addNodeGrouping: (
     options?: NodeGroupingOptions<ND, ED>
   ) => Transformation<ND, ED>;
-  /**
-   * @method Ogma.transformations.addNodeClustering
-   */
   addNodeClustering: (
     options?: NodeClusteringOptions<ND, ED>
   ) => Transformation<ND, ED>;
-  /**
-   * @method Ogma.transformations.addEdgeGrouping
-   */
   addEdgeGrouping: (
     options?: EdgeGroupingOptions<ED, ND>
   ) => Transformation<ND, ED>;
-  /**
-   * @method Ogma.transformations.addNodeFilter
-   */
   addNodeFilter: (
     options: NodeSelector<ND, ED> | NodeFilterOptions<ND, ED>
   ) => Transformation<ND, ED>;
-  /**
-   * @method Ogma.transformations.addEdgeFilter
-   */
   addEdgeFilter: (
     options: EdgeSelector<ED, ND> | EdgeFilterOptions<ED, ND>
   ) => Transformation<ND, ED>;
-  /**
-   * @method Ogma.transformations.getNodeFilters
-   */
   getNodeFilters: () => Transformation<ND, ED>[];
-  /**
-   * @method Ogma.transformations.getEdgeFilters
-   */
   getEdgeFilters: () => Transformation<ND, ED>[];
-  /**
-   * @method Ogma.transformations.addNeighborGeneration
-   */
   addNeighborGeneration: (
     options: NeighborGenerationOptions<ND, ED>
   ) => Transformation<ND, ED>;
-  /**
-   * @method Ogma.transformations.addNeighborMerging
-   */
   addNeighborMerging: (
     options: NeighborMergingOptions<ND, ED>
   ) => Transformation<ND, ED>;
-  /**
-   * @method Ogma.transformations.addNodeCollapsing
-   */
   addNodeCollapsing: (
     options?: NodeCollapsingOptions<ND, ED>
   ) => Transformation<ND, ED>;
-  /**
-   * @method Ogma.transformations.addGeoClustering
-   */
   addGeoClustering: (
     options?: GeoClusteringOptions<ND, ED>
   ) => Transformation<ND, ED>;
-  /**
-   * @method Ogma.transformations.addVirtualProperties
-   */
   addVirtualProperties: (
     options: VirtualPropertiesOptions<ND, ED>
   ) => Transformation<ND, ED>;
@@ -11635,10 +11785,12 @@ declare class TransformationAPI<ND, ED> extends APIModule<ND, ED> {
 
 /**
  * @public
+ * @typedef {(ctx: CanvasRenderingContext2D) => void} DrawingFunction The function drawing on the canvas in the graph space.
  */
 declare type DrawingFunction = (ctx: CanvasRenderingContext2D) => void;
 /**
  * @public
+ * @typedef {object} CanvasLayerOptions Canvas layer options.
  * @property {boolean} [isStatic=false] Is the canvas sync with the view ?
  * @property {boolean} [noClear=false] No clearing is executed before each draw call.
  */
@@ -11650,6 +11802,7 @@ declare type CanvasLayerOptions = {
 };
 /**
  * @public
+ * @typedef {object} OverlayOptions HTML element provided with its affine transformation in the graph space.
  * @property {HTMLElement|string} element HTML element being transformed. You can also provide an HTML string.
  * @property {{x: number, y: number}} position The element translation in the graph space.
  * @property {{width: number, height: number}} size The element size in the graph space.
@@ -11663,6 +11816,7 @@ declare type OverlayOptions = {
 /**
  * @public
  * descript;
+ * @typedef {object} Layer The layer object containing its properties.
  * @property {HTMLElement} element HTML element used by the layer.
  * @property {() => number} getLevel Retrieves the index of the layer in the layer array.
  * @property {(depth: number) => Layer} moveTo Move the layer to the specified index in the layer array.
@@ -11695,11 +11849,10 @@ interface Layer {
   getOpacity: () => number;
   setPosition: (position: Point) => this;
   setSize: (size: Size) => this;
-  _onViewChange?: () => void;
-  _onDestroy?: () => void;
 }
 /**
  * @public
+ * @typedef {object} CanvasLayer The layer object containing its properties (overloaded for handling canvas).
  * @property {HTMLElement} element HTML element used by the layer.
  * @property {() => number} getLevel Retrieves the index of the layer in the layer array.
  * @property {(depth: number) => CanvasLayer} moveTo Move the layer to the specified index in the layer array.
@@ -11721,6 +11874,7 @@ interface CanvasLayer extends Layer {
 }
 /**
  * @public
+ * @typedef {object} Overlay The layer object containing its properties (overloaded for handling transformed elements).
  * @property {HTMLElement} element HTML element used by the layer.
  * @property {() => number} getLevel Retrieves the index of the layer in the layer array.
  * @property {(depth: number) => Overlay} moveTo Move the layer to the specified index in the layer array.
@@ -11991,6 +12145,7 @@ declare function getClosestPointOnLine(
 
 /**
  * Axis-aligned bbox
+ * @typedef {Array<number>} AABB
  */
 declare type AABB = [number, number, number, number];
 declare const defaultAABB: AABB;
@@ -12240,13 +12395,9 @@ declare function isPointOnQuadraticCurve(
 declare function getPointOnEdge(edge: Edge, t: number): Point;
 /**
  * @public
- *
  * Returns the normal vector of the edge at t.
- *
  * Returns the normal at the source of the edge for t = 0 and at the target for t = 1
- *
  * @method geometry.getNormalOnEdge
- *
  * @param  {Edge} edge          An edge
  * @param  {number} t           The interpolation value bounded in [0;1].
  * @return {object} {x,y} The normal to the edge at t
@@ -12502,6 +12653,7 @@ declare class Ogma<ND = any, ED = any> {
     [key: string]: any;
   };
   static geometry: typeof geometry;
+  static parse: typeof staticMethods;
   /** @inner */
   styles: StylesAPI<ND, ED>;
   /** @inner */
@@ -12623,6 +12775,7 @@ export {
   EdgesDataChangeEvent,
   EdgesDataEvent,
   EdgesEvent,
+  EventTypes,
   Filter,
   FontStyle,
   ForceLayoutOptions,
