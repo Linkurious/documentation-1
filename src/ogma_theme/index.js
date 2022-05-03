@@ -55,14 +55,17 @@ export default async function (comments, config) {
         return slugger.slug(str);
       },
       formatParamsType(type) {
+        // write functions in a special format : `: (arg: Type): ReturnedType`
         const isFunction = formatters
           .type(type)
           .match(/(?<=^function ).*/)
           ?.pop()
           ?.trim();
         if (isFunction) return isFunction;
+        // no need to describe (again) all the object properties
         if (type?.type === 'RecordType') return ': object';
-        return `: ${formatters.type(type)}`;
+        // in case of undefined type : we prefer to not write anything instead of writing `: any`
+        return type ? `: ${formatters.type(type)}` : '';
       },
       shortSignature(section) {
         var prefix = '';

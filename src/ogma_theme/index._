@@ -38,7 +38,7 @@
                 <% const hasMembers = entries.length || comment?.members.static.length || comment?.members.instance.length %>
                 <li>
                   <a
-                    href='#<%=fullKey.toLowerCase()%>'
+                    href='#<%=fullKey.toLowerCase().replace(/^(othertypes)?/,'').replaceAll("#", "")%>'
                     class="<% if (comment?.kind === 'note') { %>h5 bold black caps<% } %> <% if (hasMembers) { %> toggle-sibling<% } %>">
                     <%- key %>
                     <% if (hasMembers) { %><span class='icon'>▸</span><% } %>
@@ -48,10 +48,9 @@
                     <% if (comment) { %>
                       <% if (comment.members.static && comment.members.static.length) { %>
                       <ul class='list-reset py1-ul pl1'>
-                        <li class='h5'><span>Static members</span></li>
                         <% comment.members.static.forEach(function(member) { %>
                           <li><a
-                            href='#<%=slug(member.namespace)%>'
+                            href='#<%=slug(member.namespace).replaceAll("#", "")%>'
                             class='regular pre-open'>
                             .<%- member.name %>
                           </a></li>
@@ -60,10 +59,9 @@
                       <% } %>
                       <% if (comment.members.instance && comment.members.instance.length) { %>
                         <ul class='list-reset py1-ul pl1'>
-                          <li class='h5'><span>Instance members</span></li>
                           <% comment.members.instance.forEach(function(member) { %>
                           <li><a
-                            href='#<%=slug(member.namespace)%>'
+                            href='#<%=slug(member.namespace).replaceAll("#", "")%>'
                             class='regular pre-open'>
                             #<%- member.name %>
                           </a></li>
@@ -72,10 +70,9 @@
                       <% } %>
                       <% if (comment.members.inner && comment.members.inner.length) { %>
                         <ul class='list-reset py1-ul pl1'>
-                          <li class='h5'><span>Inner members</span></li>
                           <% comment.members.inner.forEach(function(member) { %>
                           <li><a
-                            href='#<%=slug(member.namespace)%>'
+                            href='#<%=slug(member.namespace).replaceAll("#", "")%>'
                             class='regular pre-open'>
                             #<%- member.name %>
                           </a></li>
@@ -87,7 +84,7 @@
                           <li class='h5'>Events</li>
                           <% comment.members.events.forEach(function(member) { %>
                             <li><a
-                              href='#<%=slug(member.namespace)%>'
+                              href='#<%=slug(member.namespace).replaceAll("#", "")%>'
                               class='regular pre-open'>
                               ⓔ <%- member.name %>
                             </a></li>
