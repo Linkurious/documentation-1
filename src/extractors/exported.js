@@ -170,6 +170,8 @@ function traverseExportedSubtree(
   overrideName,
   overrideMemberOf
 ) {
+  // instead of checking each time if a binding is found or not, just skip everything if path is undefined
+  if (!path) return;
   let attachCommentPath = path;
   if (path.parentPath && path.parentPath.isExportDeclaration()) {
     attachCommentPath = path.parentPath;
@@ -229,24 +231,39 @@ function traverseExportedSubtree(
         });
     target.traverse({
       Property(path) {
-        // If leading comment has @inner tag
-        if (
-          path.node.leadingComments &&
-          path.node.leadingComments
-            .map(({ value }) => value.match(/^ *\*\*? ?@inner/))
-            .filter(matching => matching).length > 0
-        ) {
-          // Document the property type
-          const typeName =
-            path.node.typeAnnotation?.typeAnnotation?.typeName?.name;
-          if (typeName)
-            traverseExportedSubtree(
-              getBinding(classScope, typeName),
-              data,
-              addComments,
-              overrideName
-            );
-        } else addComments(data, path);
+        // Always document the property type
+        const typeName =
+          path.node.typeAnnotation?.typeAnnotation?.typeName?.name;
+        if (typeName)
+          traverseExportedSubtree(
+            getBinding(classScope, typeName),
+            data,
+            addComments,
+            overrideName
+          );
+        // Typing edge case : typeof
+        if (path.node.typeAnnotation?.typeAnnotation?.type === 'TSTypeQuery') {
+          const typeOf =
+            path.node.typeAnnotation?.typeAnnotation?.exprName?.name;
+          const namespacePath = findLocalNamespace(classScope, typeOf);
+          console.log(namespacePath ? typeOf : `NO ${namespacePath}`);
+          if (namespacePath) {
+            namespacePath.traverse({
+              Identifier(path) {
+                const identifierName = path.node.name;
+                // if they have the same name skip
+                if (typeName === identifierName) return;
+                traverseExportedSubtree(
+                  getBinding(classScope, identifierName),
+                  data,
+                  addComments
+                  // don't override name
+                );
+              }
+            });
+          }
+        }
+        addComments(data, path);
         path.skip();
       },
       Method(path) {
@@ -415,28 +432,49 @@ function getBinding(scope, local) {
   );
 }
 
-// Since we cannot use scope.getBinding for types this walks the scopes looking for a
-// top-level type alias.
-function findLocalType(scope, local) {
+function findLocalBinding(scope, explore) {
   let rv;
   let scopePath = scope.path;
+  const found = f => (rv = f);
   while (!rv && scopePath) {
-    scopePath.traverse({
-      Statement(path) {
-        path.skip();
-      },
-      TypeAlias(path) {
-        if (path.node.id.name === local) {
-          rv = path;
-          path.stop();
-        } else {
-          path.skip();
-        }
-      }
-    });
+    scopePath.traverse(explore(found));
     scopePath = scopePath.parentPath;
   }
   return rv;
+}
+
+// Since we cannot use scope.getBinding for types this walks the scopes looking for a
+// top-level type alias.
+function findLocalType(scope, local) {
+  return findLocalBinding(scope, found => ({
+    Statement(path) {
+      path.skip();
+    },
+    TypeAlias(path) {
+      if (path.node.id.name === local) {
+        found(path);
+        path.stop();
+      } else {
+        path.skip();
+      }
+    }
+  }));
+}
+
+function findLocalNamespace(scope, local) {
+  return findLocalBinding(scope, found => ({
+    Statement(path) {
+      path.skip();
+    },
+    Declaration(path) {
+      if (path.node?.id?.name === local) {
+        found(path);
+        path.stop();
+      } else {
+        path.skip();
+      }
+    }
+  }));
 }
 
 /**
