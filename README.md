@@ -1,22 +1,16 @@
 ### 🎯 Purpose of this branch
 
-Reproduce issues that I currently encounter when generating documentation with documentation.js
+Generate the Ogma documentation from its declaration file.
 
-### How to reproduce the "issues"
+### Steps to generate the documentation
 
-`npm i && npm run doc:e:docd`
+1. Generate the Ogma declaration file, paste it in `./example/ogma.min.d.ts`. (_fix the babel parser error :_ replace `readonly (.*) = (.*)` by `readonly $1`)
 
-Open the generated documentation `example/index.html`
+2. Install the dependencies : `npm i`.
 
-Then check the comments in `example/doc.d.ts`
+3. Generate the documentation : `npm run doc:e: ./example/ogma.min.d.ts`.
 
-### List of "issues"
-
-- ~~#1 ignored class methods in declaration files~~
-- ~~#2 some jsdoc description is not consumed~~
-- ~~#3 event names and description using `@event` tag are corrupted~~
-- #4 event is not part of the class "Instance Members"
-- ~~#5 documentation for interfaces is missing~~
+4. Open the generated documentation : `example/index.html` in your web browser.
 
 ---
 
