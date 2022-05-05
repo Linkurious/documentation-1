@@ -3,12 +3,18 @@
   <% if (property.default) { %>
     (default <code><%- property.default %></code>)
   <% } %></td>
-  <td class='break-word'><span><%= md(property.description, true) %></span></td>
+  <td class='break-word'>
+    <% if(property.description) { %>
+      <span><%= md(property.description, true) %></span>
+    <% } else { %>
+      <span style="color: grey; font-style: italic;">No description.</span>
+    <% } %>
+  </td>
 </tr>
 <% if(property.properties && property.properties.length) { %>
   <% property.properties.forEach(function(childProperty) { %>
     <%= renderParamProperty({
-      property: childProperty,
+      property: {...childProperty, name: `ㅤ${property._indent || ''}${childProperty.name}`, _indent: `ㅤ${property._indent || ''}`},
       renderParamProperty: renderParamProperty
     }) %>
   <% }) %>
