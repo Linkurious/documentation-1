@@ -201,7 +201,8 @@ function traverseExportedSubtree(
             binding,
             data,
             addComments,
-            overrideName,
+            // no need to override names of extends
+            undefined,
             overrideMemberOf
           );
         });
@@ -246,7 +247,6 @@ function traverseExportedSubtree(
           const typeOf =
             path.node.typeAnnotation?.typeAnnotation?.exprName?.name;
           const namespacePath = findLocalNamespace(classScope, typeOf);
-          console.log(namespacePath ? typeOf : `NO ${namespacePath}`);
           if (namespacePath) {
             namespacePath.traverse({
               Identifier(path) {
