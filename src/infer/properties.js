@@ -1,4 +1,5 @@
 import typeAnnotation from '../type_annotation.js';
+import parseMarkdown from '../remark-parse.js';
 import findTarget from './finders.js';
 
 function prefixedName(name, prefix) {
@@ -69,6 +70,10 @@ export default function inferProperties(comment) {
   // by inferred properties
   comment.properties.forEach(prop => explicitProperties.add(prop.name));
 
+  const tags = comment.tags;
+  const tagByName = [];
+  tags.forEach(tag => (tagByName[tag.name] = tag));
+
   function inferProperties(value, prefix) {
     if (
       value.type === 'ObjectTypeAnnotation' ||
@@ -89,9 +94,12 @@ export default function inferProperties(comment) {
         }
 
         if (!explicitProperties.has(prefixedName(name, prefix))) {
-          comment.properties = comment.properties.concat(
-            propertyToDoc(property, prefix)
-          );
+          // Recover the missing description (because of JSDoc missing property type errors)
+          const description = tagByName[name]?.description;
+          comment.properties = comment.properties.concat({
+            description: description ? parseMarkdown(description) : undefined,
+            ...propertyToDoc(property, prefix)
+          });
         }
       });
     }
