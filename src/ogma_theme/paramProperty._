@@ -1,13 +1,11 @@
 <tr>
-  <td class='break-word'><span class='code bold'><%- property.name %></span> <code class='quiet'><%= formatType(property.type) %></code>
+  <td class='break-word'><span class='code bold'><%- property.name %></span> <code class='quiet'><%= property._indent ? '' : formatType(property.type) %></code>
   <% if (property.default) { %>
     (default <code><%- property.default %></code>)
   <% } %></td>
   <td class='break-word'>
     <% if(property.description) { %>
       <span><%= md(property.description, true) %></span>
-    <% } else { %>
-      <span style="color: grey; font-style: italic;">No description.</span>
     <% } %>
   </td>
 </tr>
