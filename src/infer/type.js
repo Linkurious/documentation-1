@@ -25,6 +25,30 @@ export default function inferType(comment) {
     return comment;
   }
 
+  // infer param types from TS if jsdoc type is missing
+  const paramNodes =
+    path.node.typeAnnotation?.parameters ||
+    path.node.typeAnnotation?.typeAnnotation?.parameters;
+  if (comment.params && paramNodes) {
+    const nameToTypeAnnotation = {};
+    const indexToTypeAnnotation = {};
+    paramNodes.forEach(({ name, typeAnnotation }, index) => {
+      nameToTypeAnnotation[name] = typeAnnotation;
+      indexToTypeAnnotation[index] = typeAnnotation;
+    });
+    comment.params.forEach((param, index) => {
+      if (param.type || param.name.includes('.')) return;
+      // get the type annotation from param name, fallback on its index
+      const type =
+        nameToTypeAnnotation[param.name] || indexToTypeAnnotation[index];
+
+      // Don't provide a `type` section when it's an ObjectTypeAnnotation,
+      // `properties` already exists and renders better.
+      if (type && type.type !== 'ObjectTypeAnnotation')
+        param.type = typeAnnotation(type);
+    });
+  }
+
   const n = path.node;
   let type;
   switch (n.type) {
@@ -41,6 +65,7 @@ export default function inferType(comment) {
       break;
     case 'ClassMethod':
     case 'TSDeclareMethod':
+    case 'TSDeclareFunction':
       if (n.kind === 'get') {
         type = n.returnType;
       } else if (n.kind === 'set' && n.params[0]) {
