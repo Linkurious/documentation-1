@@ -61,7 +61,7 @@ function tsDoctrine(type) {
   }
 
   // TODO: unhandled types
-  // TSIntersectionType, TSConditionalType, TSInferType, TSTypeOperator, TSIndexedAccessType
+  // TSConditionalType, TSInferType, TSTypeOperator, TSIndexedAccessType
   // TSMappedType, TSImportType, TSTypePredicate, TSTypeQuery, TSExpressionWithTypeArguments
 
   if (type.type in oneToOne) {
@@ -69,6 +69,11 @@ function tsDoctrine(type) {
   }
 
   switch (type.type) {
+    case 'TSIntersectionType':
+      return {
+        type: 'IntersectionType',
+        elements: type.types.map(tsDoctrine)
+      };
     case 'TSOptionalType':
       return {
         type: 'NullableType',

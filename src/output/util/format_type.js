@@ -101,6 +101,7 @@ function decorate(formatted, str, prefix) {
  * formatType({ type: 'NameExpression', name: 'String' })[0].url
  * // => 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String'
  */
+
 export default function formatType(getHref, node) {
   let result = [];
 
@@ -109,6 +110,8 @@ export default function formatType(getHref, node) {
   }
 
   switch (node.type) {
+    case 'IntersectionType':
+      return commaList(getHref, node.elements, '(', ')', ' & ');
     case Syntax.NullableLiteral:
       return [t('?')];
     case Syntax.AllLiteral:
