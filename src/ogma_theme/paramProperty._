@@ -1,5 +1,8 @@
+<% const properties = property.properties; %>
+<% const fields = property.type?.fields || property.type?.expression?.fields; %>
+
 <tr>
-  <td class='break-word'><span class='code bold'><%- property.name %></span> <code class='quiet'><%= property._indent ? '' : formatType(property.type) %></code>
+  <td class='break-word'><span class='code bold'><%- `${property._indent || ''}${property.name?.split(".")?.pop()}` %></span> <code class='quiet'><%= fields && fields.length ? '' : formatType(property.type) %></code>
   <% if (property.default) { %>
     (default <code><%- property.default %></code>)
   <% } %></td>
@@ -9,11 +12,28 @@
     <% } %>
   </td>
 </tr>
-<% if(property.properties && property.properties.length) { %>
-  <% property.properties.forEach(function(childProperty) { %>
+
+<% if(properties && properties.length) { %>
+  <% properties.sort((a, b) => a.name.localeCompare(b.name)).forEach(function(childProperty) { %>
     <%= renderParamProperty({
-      property: {...childProperty, name: `ㅤ${property._indent || ''}${childProperty.name}`, _indent: `ㅤ${property._indent || ''}`},
-      renderParamProperty: renderParamProperty
+      property: {...childProperty,
+        name: childProperty.name,
+        _indent: `ㅤ${property._indent || ''}`
+      },
+      renderParamProperty,
+      renderParamField
+    }) %>
+  <% }) %>
+<% } %>
+
+<% if(fields && fields.length) { %>
+  <% fields.sort((a, b) => a.key.localeCompare(b.key)).forEach(function(childField) { %>
+    <%= renderParamField({
+      field: {...childField,
+        key: childField.key,
+        _indent: `ㅤ${property._indent || ''}`
+      },
+      renderParamField
     }) %>
   <% }) %>
 <% } %>

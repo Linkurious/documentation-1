@@ -11,8 +11,9 @@
       <div class="clearfix display-none toggle-target">
         <%= renderSection({
           section: member,
-          renderSection: renderSection,
-          renderParamProperty: renderParamProperty,
+          renderSection,
+          renderParamProperty,
+          renderParamField,
      	    nested: true
         }) %>
       </div>

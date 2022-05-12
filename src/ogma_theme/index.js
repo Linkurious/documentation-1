@@ -134,6 +134,10 @@ export default async function (comments, config) {
     await fs.readFile(path.join(__dirname, 'paramProperty._'), 'utf8'),
     sharedImports
   );
+  sharedImports.imports.renderParamField = template(
+    await fs.readFile(path.join(__dirname, 'paramField._'), 'utf8'),
+    sharedImports
+  );
 
   var pageTemplate = template(
     await fs.readFile(path.join(__dirname, 'index._'), 'utf8'),

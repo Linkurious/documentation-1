@@ -120,9 +120,10 @@
           <% } else { %>
           <%= renderSection({
             section: s,
-            renderSection: renderSection,
-            renderSectionList: renderSectionList,
-            renderParamProperty: renderParamProperty
+            renderSection,
+            renderSectionList,
+            renderParamProperty,
+            renderParamField
           }) %>
           <% } %>
         <% }) %>
