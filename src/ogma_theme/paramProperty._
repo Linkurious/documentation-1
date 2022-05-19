@@ -1,11 +1,16 @@
 <% const properties = property.properties; %>
 <% const fields = property.type?.fields || property.type?.expression?.fields; %>
 
+<% const formatName = str => str.split(".")?.pop(); %>
+
 <tr>
-  <td class='break-word'><span class='code bold'><%- `${property._indent || ''}${property.name?.split(".")?.pop()}` %></span> <code class='quiet'><%= fields && fields.length ? '' : formatType(property.type) %></code>
-  <% if (property.default) { %>
-    (default <code><%- property.default %></code>)
-  <% } %></td>
+  <td class='break-word'>
+    <span class='code bold'><%- `${property._indent || ''}${property.name ? formatName(property.name) : ''}` %></span>
+    <code class='quiet'><%= fields && fields.length ? '' : formatType(property.type) %></code>
+    <% if (property.default) { %>
+      (default <code><%- property.default %></code>)
+    <% } %>
+  </td>
   <td class='break-word'>
     <% if(property.description) { %>
       <span><%= md(property.description, true) %></span>
@@ -13,10 +18,17 @@
   </td>
 </tr>
 
+<% const fieldNameToType = {}; %>
+<% if(fields) fields.forEach(field => fieldNameToType[field.key] = field.value); %>
+
+<% // Do not comment field + property at the same time, it would create duplicates %>
 <% if(properties && properties.length) { %>
   <% properties.sort((a, b) => a.name.localeCompare(b.name)).forEach(function(childProperty) { %>
     <%= renderParamProperty({
-      property: {...childProperty,
+      property: {
+        // if property type is not found : backup on field type
+        type: fieldNameToType[formatName(childProperty.name)],
+        ...childProperty,
         name: childProperty.name,
         _indent: `ㅤ${property._indent || ''}`
       },
@@ -24,9 +36,7 @@
       renderParamField
     }) %>
   <% }) %>
-<% } %>
-
-<% if(fields && fields.length) { %>
+<% } else if(fields && fields.length) { %>
   <% fields.sort((a, b) => a.key.localeCompare(b.key)).forEach(function(childField) { %>
     <%= renderParamField({
       field: {...childField,

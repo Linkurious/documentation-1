@@ -484,7 +484,7 @@ function findLocalNamespace(scope, local) {
  * @param type declaration optional type
  * @returns
  */
-function findDeclaration(scope, local, type = '*') {
+export function findDeclaration(scope, local, type = '*') {
   let rv;
   let scopePath = scope.path;
   while (!rv && scopePath) {
