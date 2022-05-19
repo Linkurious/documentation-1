@@ -376,8 +376,16 @@ function mergeTopNodes(inferred, explicit, comment) {
             : inferredTag.type;
 
         // Infer types only for name expressions (if explicit tag properties exist)
-        if (inferredTagType.type === 'NameExpression' && properties) {
-          const typeName = inferredTagType.name;
+        if (
+          (properties && inferredTagType.type === 'NameExpression') ||
+          inferredTagType.type === 'TypeApplication'
+        ) {
+          let typeName;
+          if (inferredTagType.type === 'NameExpression')
+            typeName = inferredTagType.name;
+          // special case for generic types
+          else if (inferredTagType.type === 'TypeApplication')
+            typeName = inferredTagType.expression.name;
 
           // Skip primitives
           if (!isPrimitive(typeName)) {
