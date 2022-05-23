@@ -1,3 +1,45 @@
+### 🎯 Purpose of this branch
+
+Generate the Ogma documentation from its declaration file.
+
+### Steps to generate the documentation
+
+1. Generate the Ogma declaration file, paste it in `./example/ogma.min.d.ts`. Then, apply these temp fixes :
+
+   - _babel parser error temp fix_ : replace `readonly (.*) = (.*)` by `readonly $1`
+
+   - _remove jsdoc typedefs but preserve descriptions_ : replace `@typedef\s*(\)\s*([a-zA-Z]*)` by ``
+
+   - _remove jsodc types_ : replace `(@.*)\s*\{(.*)\}\s*` by `$1`
+
+2. Install the dependencies : `npm i`.
+
+3. Generate the documentation : `npm run doc:e: ./example/ogma.min.d.ts`.
+
+4. Open the generated documentation : `example/index.html` in your web browser.
+
+### How does the Ogma theme work?
+
+[Theming](https://github.com/documentationjs/documentation/blob/master/docs/THEMING.md) is based on HTML templates `._` (underscore files) feeded by documentation.js generated comments (objects gathering documentation descriptions, types, examples, etc.).
+You can find the Ogma theme files in `./src/ogma_theme` directory.
+
+It consists of underscore templates and a few assets: a [highlight.js](https://highlightjs.org/)
+theme and [basscss](https://basscss.com/) as a basic CSS framework.
+
+This is NOT bundled by default in documentation: it is NOT the default theme. Use `--theme ./src/ogma_theme/index.js` option to activate the Ogma theme.
+
+The theme contents are the following:
+
+- `index._`, the main template that defines the document structure
+- `section._`, a partial used to render each chunk of documentation
+- `assets/*`, any assets, including CSS & JS
+
+---
+
+---
+
+---
+
 <p align="center">
   <img src="./.github/documentation-js-logo.png" width="650" />
 </p>

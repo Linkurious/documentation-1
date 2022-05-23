@@ -1,0 +1,134 @@
+.api-page * .main {
+  padding-left: 2em;
+}
+.api-page * .main * .main-info {
+  color: #3492ff;
+}
+.api-page * .main * .tag--is-optional {
+  font-size: x-small;
+  display: inline-block;
+  margin-left: 0.25em;
+}
+.api-page * .main * .type {
+  color: #3492ff;
+}
+.api-page * .main * .inline-description p code {
+  font-size: 1.25em;
+}
+.api-page * .main * .inline-description * .typeref {
+  text-decoration: underline;
+}
+.api-page * .main * .typeref {
+  font-weight: bolder;
+}
+.api-page * .main * .typeref:hover {
+  color: #6e0100;
+}
+.api-page * .main * .default-value {
+  color: #6e0100;
+}
+.api-page * .main * .optional {
+  font-size: x-small;
+}
+.api-page * .main * .name,
+.api-page * .main * .analog {
+  font-weight: bold;
+}
+.api-page * .main * .analog-title {
+  font-style: italic;
+}
+.api-page * .main #content #sources {
+  width: 90%;
+}
+.api-page * .main * .returns {
+  font-weight: bold;
+}
+.api-page * .main * .list-item {
+  padding: 1em 0 0.3em 0;
+  display: block;
+  font-size: 1.5em;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.api-page * .main * .list-item * .icon {
+  margin-left: -1.5em;
+}
+.api-page * .main * .inline-description p {
+  display: inline;
+  font-size: medium;
+}
+.api-page * .main * .properties {
+  padding-bottom: 1em;
+  max-width: 600px;
+}
+.api-page * .main * .properties ul {
+  padding-left: 2em;
+}
+.api-page * .main li p {
+  max-width: 800px;
+}
+.api-page * .main li * .properties {
+  padding-bottom: 0;
+}
+.api-page * .main * .type a,
+.api-page * .main * .type code,
+.api-page * .main * .inline-description * .typeref {
+  color: #3492ff;
+}
+.api-page * .main * .type code {
+  padding: 0;
+  font-size: 0.875em;
+}
+.api-page * .main * .section-title {
+  color: #514f6a;
+  font-weight: bold;
+  padding-top: 1em;
+}
+.api-page * .main * .item-section {
+  max-width: 800px;
+}
+.api-page * .main * .item-section code {
+  background: none;
+  font-size: 1em;
+}
+.api-page * .main * .item-section h4 {
+  font-size: 1em;
+  font-weight: bold;
+  color: #909090;
+  padding-bottom: 0.75em;
+  margin-top: 1em;
+}
+.api-page * .main * .item-section.item-section--examples {
+  max-width: none;
+}
+.api-page * .main * .item-section ul {
+  padding-left: 2em;
+}
+.api-page * .main * .item-section p code {
+  padding: 0;
+}
+.api-page * .main * .item-section * .default-value code {
+  padding: 0;
+}
+.api-page * .main * .item-section pre {
+  border-radius: 5px 0 0 5px;
+}
+.api-page * .main * .deprecated-tag {
+  font-size: small;
+  padding: 3px;
+  margin-left: 10px;
+  border-radius: 3px;
+  color: white;
+  background: firebrick;
+}
+.api-page * .main * .property-deprecated-tag {
+  font-size: small;
+  color: grey;
+}
+.api-page * .main * .deprecated,
+.api-page * .main * .deprecated a {
+  color: grey;
+}
+.api-page * .main * .deprecated-menu {
+  font-style: italic;
+  text-decoration: line-through;
+}

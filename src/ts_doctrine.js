@@ -1,4 +1,5 @@
 import generator from '@babel/generator';
+
 const generate = generator.default || generator;
 
 const namedTypes = {
@@ -60,7 +61,7 @@ function tsDoctrine(type) {
   }
 
   // TODO: unhandled types
-  // TSIntersectionType, TSConditionalType, TSInferType, TSTypeOperator, TSIndexedAccessType
+  // TSConditionalType, TSInferType, TSTypeOperator, TSIndexedAccessType
   // TSMappedType, TSImportType, TSTypePredicate, TSTypeQuery, TSExpressionWithTypeArguments
 
   if (type.type in oneToOne) {
@@ -68,6 +69,11 @@ function tsDoctrine(type) {
   }
 
   switch (type.type) {
+    case 'TSIntersectionType':
+      return {
+        type: 'IntersectionType',
+        elements: type.types.map(tsDoctrine)
+      };
     case 'TSOptionalType':
       return {
         type: 'NullableType',
@@ -169,6 +175,11 @@ function tsDoctrine(type) {
       return {
         type: `${type.literal.type}Type`,
         value: type.literal.value
+      };
+    case 'TSInterfaceBody':
+      return {
+        type: 'RecordType',
+        fields: type.body.map(propertyToField).filter(x => x)
       };
     default:
       return {

@@ -19,7 +19,7 @@ export default function inferType(comment) {
     return comment;
   }
 
-  const ast = comment.context.ast;
+  const { ast } = comment.context;
   const path = findTarget(ast);
   if (!path) {
     return comment;
@@ -41,11 +41,23 @@ export default function inferType(comment) {
       break;
     case 'ClassMethod':
     case 'TSDeclareMethod':
+    case 'TSDeclareFunction':
       if (n.kind === 'get') {
         type = n.returnType;
       } else if (n.kind === 'set' && n.params[0]) {
         type = n.params[0].typeAnnotation;
       }
+      // Mock function type if we don't find type
+      if (type === undefined)
+        type = {
+          type: 'TSTypeAnnotation',
+          typeAnnotation: {
+            type: 'TSFunctionType',
+            typeParameters: undefined,
+            parameters: n.params,
+            typeAnnotation: n.returnType
+          }
+        };
       break;
     case 'TypeAlias':
       type = n.right;
@@ -58,6 +70,9 @@ export default function inferType(comment) {
       } else {
         type = constTypeMapping.NumericLiteral;
       }
+      break;
+    case 'TSInterfaceDeclaration':
+      type = n.body;
       break;
     default:
       if (ast.isObjectTypeProperty() && !ast.node.method) {

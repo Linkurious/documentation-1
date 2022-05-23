@@ -3,8 +3,21 @@ import babelGenerate from '@babel/generator';
 import _ from 'lodash';
 import findTarget from './finders.js';
 import typeAnnotation from '../type_annotation.js';
+import { findDeclaration } from '../extractors/exported.js';
 
 const generate = babelGenerate.default || babelGenerate;
+
+// TODO: move it to an "utils" directory
+const primitives = [
+  'null',
+  'undefined',
+  'boolean',
+  'number',
+  'string',
+  'symbol',
+  'bigint'
+];
+const isPrimitive = typeName => primitives.indexOf(typeName) > -1;
 
 /**
  * Infers param tags by reading function parameter names
@@ -39,38 +52,31 @@ export default function inferParams(comment) {
     }
   }
 
-  if (
-    !t.isFunction(path) &&
-    !t.isTSDeclareFunction(path) &&
-    !t.isTSDeclareMethod(path) &&
-    !t.isFunctionTypeAnnotation(path) &&
-    !t.isTSMethodSignature(path)
-  ) {
-    return comment;
-  }
+  let result = comment;
+  let params =
+    (t.is.params ||
+    (path.node?.parametersTSMethodSignature &&
+      path.node.parametersTSMethodSignature(path))
+      ? path.node?.parameters
+      : path.node?.params) ||
+    // Case for property definitions of functions
+    path.node?.typeAnnotation?.typeAnnotation?.parameters;
 
-  if (comment.kind === 'class' && comment.hideconstructor) {
-    return comment;
-  }
+  if (params) {
+    // Flow function annotations separate rest parameters into a different list
+    if (t.isFunctionTypeAnnotation(path) && path.node.rest)
+      params = params.concat(path.node.rest);
 
-  let params = t.isTSMethodSignature(path)
-    ? path.node.parameters
-    : path.node.params;
+    // Wrap flow rest parameter with a RestType
+    if (t.isFunctionTypeAnnotation(path) && path.node.rest) {
+      const rest = result.params[result.params.length - 1];
+      rest.type = {
+        type: 'RestType',
+        expression: rest.type
+      };
+    }
 
-  // Flow function annotations separate rest parameters into a different list
-  if (t.isFunctionTypeAnnotation(path) && path.node.rest) {
-    params = params.concat(path.node.rest);
-  }
-
-  const result = inferAndCombineParams(params, comment);
-
-  // Wrap flow rest parameter with a RestType
-  if (t.isFunctionTypeAnnotation(path) && path.node.rest) {
-    const rest = result.params[result.params.length - 1];
-    rest.type = {
-      type: 'RestType',
-      expression: rest.type
-    };
+    result = inferAndCombineParams(params, comment);
   }
 
   return result;
@@ -92,7 +98,11 @@ function inferAndCombineParams(params, comment) {
   if (comment.constructorComment) {
     paramsToMerge.push.apply(paramsToMerge, comment.constructorComment.params);
   }
-  const mergedParamsAndErrors = mergeTrees(inferredParams, paramsToMerge);
+  const mergedParamsAndErrors = mergeTrees(
+    inferredParams,
+    paramsToMerge,
+    comment
+  );
 
   // Then merge the trees. This is the hard part.
   return Object.assign(comment, {
@@ -314,7 +324,7 @@ function renameTree(node, explicitName) {
   }
 }
 
-export function mergeTrees(inferred, explicit) {
+export function mergeTrees(inferred, explicit, comment) {
   // The first order of business is ensuring that the root types are specified
   // in the right order. For the order of arguments, the inferred reality
   // is the ground-truth: a function like
@@ -332,10 +342,10 @@ export function mergeTrees(inferred, explicit) {
     }
   }
 
-  return mergeTopNodes(inferred, explicit);
+  return mergeTopNodes(inferred, explicit, comment);
 }
 
-function mergeTopNodes(inferred, explicit) {
+function mergeTopNodes(inferred, explicit, comment) {
   const mapExplicit = mapTags(explicit);
   const inferredNames = new Set(inferred.map(tag => tag.name));
   const explicitTagsWithoutInference = explicit.filter(tag => {
@@ -358,8 +368,69 @@ function mergeTopNodes(inferred, explicit) {
     mergedParams: inferred
       .map(inferredTag => {
         const explicitTag = mapExplicit.get(inferredTag.name);
+        // We want to infer types of explicit tag properties
+        const properties = explicitTag?.properties;
+        const inferredTagType =
+          inferredTag.type.type === 'OptionalType'
+            ? inferredTag.type.expression
+            : inferredTag.type;
+
+        // Infer types only for name expressions (if explicit tag properties exist)
+        if (
+          (properties && inferredTagType.type === 'NameExpression') ||
+          inferredTagType.type === 'TypeApplication'
+        ) {
+          let typeName;
+          if (inferredTagType.type === 'NameExpression')
+            typeName = inferredTagType.name;
+          // special case for generic types
+          else if (inferredTagType.type === 'TypeApplication')
+            typeName = inferredTagType.expression.name;
+
+          // Skip primitives
+          if (!isPrimitive(typeName)) {
+            // Build a map associating type names with type annotations used by this explicit tag property
+            const keyNameToTypeAnnotation = {};
+            const enrichKeyNameToTypeAnnotation = (typeName, prefix = '') => {
+              const typeNode = findDeclaration(
+                comment.context.ast.scope,
+                typeName
+              );
+              const body = typeNode?.node?.body?.body;
+              if (body)
+                body.forEach(node => {
+                  keyNameToTypeAnnotation[`${prefix}${node.key.name}`] =
+                    node.typeAnnotation;
+                  const nestedTypeName =
+                    node.typeAnnotation?.typeAnnotation?.typeName?.name;
+                  if (nestedTypeName)
+                    enrichKeyNameToTypeAnnotation(
+                      nestedTypeName,
+                      `${prefix}${node.key.name}.`
+                    );
+                });
+              const extend = typeNode?.node?.extends;
+              if (extend)
+                enrichKeyNameToTypeAnnotation(extend.pop()?.expression?.name);
+            };
+            enrichKeyNameToTypeAnnotation(typeName, `${inferredTag.name}.`);
+
+            // Now infer explicit tag property type
+            const inferPropertyType = property => {
+              const { name, properties } = property;
+              if (name && keyNameToTypeAnnotation[name])
+                // We have successfully inferred the type of this explicit tag property
+                property.type = typeAnnotation(keyNameToTypeAnnotation[name]);
+              if (properties)
+                // Recursively infer types (e.g. `@param foo.bar.baz`)
+                properties.forEach(inferPropertyType);
+            };
+            inferPropertyType({ properties });
+          }
+        }
+
         return explicitTag
-          ? combineTags(inferredTag, explicitTag)
+          ? combineTags(inferredTag, explicitTag, comment)
           : inferredTag;
       })
       .concat(explicitTagsWithoutInference)

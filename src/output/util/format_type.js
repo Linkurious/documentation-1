@@ -1,6 +1,7 @@
 import doctrine from 'doctrine-temporary-fork';
-const Syntax = doctrine.Syntax;
 import { u } from 'unist-builder';
+
+const { Syntax } = doctrine;
 
 /**
  * Shortcut to create a new text node
@@ -100,6 +101,7 @@ function decorate(formatted, str, prefix) {
  * formatType({ type: 'NameExpression', name: 'String' })[0].url
  * // => 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String'
  */
+
 export default function formatType(getHref, node) {
   let result = [];
 
@@ -108,6 +110,8 @@ export default function formatType(getHref, node) {
   }
 
   switch (node.type) {
+    case 'IntersectionType':
+      return commaList(getHref, node.elements, '(', ')', ' & ');
     case Syntax.NullableLiteral:
       return [t('?')];
     case Syntax.AllLiteral:
@@ -122,7 +126,7 @@ export default function formatType(getHref, node) {
       return [link(node.name, getHref)];
     case Syntax.ParameterType:
       if (node.name) {
-        result.push(t(node.name + ': '));
+        result.push(t(`${node.name}: `));
       }
       return result.concat(formatType(getHref, node.expression));
 
@@ -139,7 +143,7 @@ export default function formatType(getHref, node) {
 
     case Syntax.FieldType:
       if (node.value) {
-        return [t(node.key + ': ')].concat(formatType(getHref, node.value));
+        return [t(`${node.key}: `)].concat(formatType(getHref, node.value));
       }
       return [t(node.key)];
 
@@ -176,7 +180,7 @@ export default function formatType(getHref, node) {
     case Syntax.OptionalType:
       if (node.default) {
         return decorate(formatType(getHref, node.expression), '?').concat(
-          t('= ' + node.default)
+          t(`= ${node.default}`)
         );
       }
       return decorate(formatType(getHref, node.expression), '?');
@@ -191,6 +195,6 @@ export default function formatType(getHref, node) {
       return [u('inlineCode', String(node.value))];
 
     default:
-      throw new Error('Unknown type ' + node.type);
+      throw new Error(`Unknown type ${node.type}`);
   }
 }

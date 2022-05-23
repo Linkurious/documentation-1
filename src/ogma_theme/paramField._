@@ -1,0 +1,25 @@
+<% const fields = field.value?.fields || field.value?.expression?.fields; %>
+
+<tr>
+  <td class='break-word'><span class='code bold'><%- `${field._indent || ''}${field.key}` %></span> <code class='quiet'><%= fields && fields.length ? '' : formatType(field.value) %></code>
+  <% if (field.default) { %>
+    (default <code><%- field.default %></code>)
+  <% } %></td>
+  <td class='break-word'>
+    <% if(field.description) { %>
+      <span><%= md(field.description, true) %></span>
+    <% } %>
+  </td>
+</tr>
+
+<% if(fields && fields.length) { %>
+  <% fields.sort((a, b) => a.key.localeCompare(b.key)).forEach(function(childField) { %>
+    <%= renderParamField({
+      field: {...childField,
+        key: childField.key,
+        _indent: `ㅤ${field._indent || ''}`
+      },
+      renderParamField
+    }) %>
+  <% }) %>
+<% } %>

@@ -1,11 +1,11 @@
 import babelTraverse from '@babel/traverse';
-import isJSDocComment from '../is_jsdoc_comment.js';
 import t from '@babel/types';
 import nodePath from 'path';
 import fs from 'fs';
+import { createRequire } from 'module';
 import { parseToAst } from '../parsers/parse_to_ast.js';
 import findTarget from '../infer/finders.js';
-import { createRequire } from 'module';
+import isJSDocComment from '../is_jsdoc_comment.js';
 
 const require = createRequire(import.meta.url);
 const traverse = babelTraverse.default || babelTraverse;
@@ -66,20 +66,22 @@ export default function walkExported(
       .filter(Boolean);
   }
 
-  function addComments(data, path, overrideName) {
+  function addComments(data, path, overrideName, overrideMemberOf) {
     const comments = getComments(data, path);
     if (overrideName) {
       comments.forEach(function (comment) {
         comment.name = overrideName;
       });
     }
+    if (overrideMemberOf) {
+      comments.forEach(function (comment) {
+        comment.memberof = overrideMemberOf;
+      });
+    }
     newResults.push.apply(newResults, comments);
   }
 
   traverse(ast, {
-    Statement(path) {
-      path.skip();
-    },
     ExportDeclaration(path) {
       const declaration = path.get('declaration');
       if (t.isDeclaration(declaration)) {
@@ -89,8 +91,17 @@ export default function walkExported(
 
       if (path.isExportDefaultDeclaration()) {
         if (declaration.isIdentifier()) {
-          const binding = declaration.scope.getBinding(declaration.node.name);
-          traverseExportedSubtree(binding.path, data, addComments);
+          // Find the binding path, scanning scope from bottom to top
+          const bindingPath = getBinding(
+            declaration.scope,
+            declaration.node.name
+          );
+          // If no binding path is found, print an error & skip this path
+          if (!bindingPath) {
+            console.error(new Error(`Unreachable : ${declaration.node.name}`));
+            return path.skip();
+          }
+          traverseExportedSubtree(bindingPath, data, addComments);
           return path.skip();
         }
 
@@ -100,8 +111,8 @@ export default function walkExported(
 
       if (t.isExportNamedDeclaration(path)) {
         const specifiers = path.get('specifiers');
-        const source = path.node.source;
-        const exportKind = path.node.exportKind;
+        const { source } = path.node;
+        const { exportKind } = path.node;
         specifiers.forEach(specifier => {
           let specData = data;
           let local;
@@ -124,18 +135,23 @@ export default function walkExported(
             );
             bindingPath = tmp.ast;
             specData = tmp.data;
-          } else if (exportKind === 'value') {
-            bindingPath = path.scope.getBinding(local).path;
-          } else if (exportKind === 'type') {
-            bindingPath = findLocalType(path.scope, local);
           } else {
-            throw new Error('Unreachable');
+            // Find the binding path, scanning scope from bottom to top
+            bindingPath = getBinding(path.scope, local);
+            // If no binding path is found, print an error & skip this path
+            if (!bindingPath) {
+              console.error(new Error(`Unreachable : ${local}`));
+              return path.skip();
+            }
           }
 
           if (bindingPath === undefined) {
-            throw new Error(
-              `Unable to find the value ${exported} in ${specData.file}`
+            console.error(
+              new Error(
+                `Unable to find the value ${exported} in ${specData.file}`
+              )
             );
+            return path.skip();
           }
           traverseExportedSubtree(bindingPath, specData, addComments, exported);
         });
@@ -147,12 +163,21 @@ export default function walkExported(
   return newResults;
 }
 
-function traverseExportedSubtree(path, data, addComments, overrideName) {
+function traverseExportedSubtree(
+  path,
+  data,
+  addComments,
+  overrideName,
+  overrideMemberOf
+) {
+  // instead of checking each time if a binding is found or not, just skip everything if path is undefined
+  if (!path) return;
   let attachCommentPath = path;
   if (path.parentPath && path.parentPath.isExportDeclaration()) {
     attachCommentPath = path.parentPath;
   }
-  addComments(data, attachCommentPath, overrideName);
+  // Avoid duplicates if memberof is overridden
+  if (!overrideMemberOf) addComments(data, attachCommentPath, overrideName);
 
   let target = findTarget(path);
   if (!target) {
@@ -163,9 +188,81 @@ function traverseExportedSubtree(path, data, addComments, overrideName) {
     target = target.get('init');
   }
 
+  if (t.isTSInterfaceDeclaration(target)) {
+    addComments(data, path, undefined, overrideMemberOf);
+
+    // Heritage needs documentation too
+    if (target.node.extends) {
+      target.node.extends
+        .map(({ expression }) => expression.name)
+        .forEach(name => {
+          const binding = getBinding(path.scope, name);
+          traverseExportedSubtree(
+            binding,
+            data,
+            addComments,
+            // no need to override names of extends
+            undefined,
+            overrideMemberOf
+          );
+        });
+    }
+  }
+
   if (target.isClass() || target.isObjectExpression()) {
+    const classScope = path.scope;
+    // Handle mixins if a declaration is found in the target scope
+    const declaration = findDeclaration(
+      classScope,
+      target.node.id.name,
+      'TSInterfaceDeclaration'
+    );
+    if (declaration)
+      declaration.node.extends
+        .map(({ expression }) => getBinding(classScope, expression.name))
+        .filter(binding => binding)
+        .forEach(binding => {
+          traverseExportedSubtree(
+            binding,
+            data,
+            addComments,
+            overrideName,
+            target.node.id.name
+          );
+        });
     target.traverse({
       Property(path) {
+        // Always document the property type
+        const typeName =
+          path.node.typeAnnotation?.typeAnnotation?.typeName?.name;
+        if (typeName)
+          traverseExportedSubtree(
+            getBinding(classScope, typeName),
+            data,
+            addComments,
+            overrideName
+          );
+        // Typing edge case : typeof
+        if (path.node.typeAnnotation?.typeAnnotation?.type === 'TSTypeQuery') {
+          const typeOf =
+            path.node.typeAnnotation?.typeAnnotation?.exprName?.name;
+          const namespacePath = findLocalNamespace(classScope, typeOf);
+          if (namespacePath) {
+            namespacePath.traverse({
+              Identifier(path) {
+                const identifierName = path.node.name;
+                // if they have the same name skip
+                if (typeName === identifierName) return;
+                traverseExportedSubtree(
+                  getBinding(classScope, identifierName),
+                  data,
+                  addComments
+                  // don't override name
+                );
+              }
+            });
+          }
+        }
         addComments(data, path);
         path.skip();
       },
@@ -173,7 +270,23 @@ function traverseExportedSubtree(path, data, addComments, overrideName) {
         // Don't explicitly document constructor methods: their
         // parameters are output as part of the class itself.
         if (path.node.kind !== 'constructor') {
-          addComments(data, path);
+          addComments(data, path, undefined, overrideMemberOf);
+        }
+        path.skip();
+      },
+      TSDeclareMethod(path) {
+        // Let's document all the types that this method is using.
+        path.traverse({
+          TSTypeReference(refPath) {
+            const binding = getBinding(classScope, refPath.node.typeName.name);
+            // Add comments only if binding is found in the class scope.
+            if (binding) addComments(data, binding);
+          }
+        });
+        // Don't explicitly document constructor methods: their
+        // parameters are output as part of the class itself.
+        if (path.node.kind !== 'constructor') {
+          addComments(data, path, undefined, overrideMemberOf);
         }
         path.skip();
       }
@@ -213,8 +326,8 @@ function findExportDeclaration(
 ) {
   const depPath = nodePath.resolve(nodePath.dirname(referrer), filename);
   const tmp = getCachedData(dataCache, depPath);
-  const ast = tmp.ast;
-  let data = tmp.data;
+  const { ast } = tmp;
+  let { data } = tmp;
 
   let rv;
   traverse(ast, {
@@ -252,10 +365,11 @@ function findExportDeclaration(
         // export {x as y}
         // export {x as y} from './file.js'
         const specifiers = path.get('specifiers');
-        const source = path.node.source;
+        const { source } = path.node;
         for (let i = 0; i < specifiers.length; i++) {
           const specifier = specifiers[i];
-          let local, exported;
+          let local;
+          let exported;
           if (t.isExportDefaultSpecifier(specifier)) {
             // export x from ...
             local = 'default';
@@ -305,22 +419,89 @@ function findExportDeclaration(
   };
 }
 
-// Since we cannot use scope.getBinding for types this walks the current scope looking for a
+/**
+ * Find binding (https://github.com/jamiebuilds/babel-handbook/blob/master/translations/en/plugin-handbook.md#bindings)
+ * by scanning scope from bottom to top. If that's the case, walk the current scope looking
+ * for a top-level type alias or any other kind of node path.
+ */
+function getBinding(scope, local) {
+  return (
+    scope.getBinding(local)?.path ||
+    findLocalType(scope, local) ||
+    findDeclaration(scope, local)
+  );
+}
+
+function findLocalBinding(scope, explore) {
+  let rv;
+  let scopePath = scope.path;
+  const found = f => (rv = f);
+  while (!rv && scopePath) {
+    scopePath.traverse(explore(found));
+    scopePath = scopePath.parentPath;
+  }
+  return rv;
+}
+
+// Since we cannot use scope.getBinding for types this walks the scopes looking for a
 // top-level type alias.
 function findLocalType(scope, local) {
-  let rv;
-  scope.path.traverse({
+  return findLocalBinding(scope, found => ({
     Statement(path) {
       path.skip();
     },
     TypeAlias(path) {
       if (path.node.id.name === local) {
-        rv = path;
+        found(path);
         path.stop();
       } else {
         path.skip();
       }
     }
-  });
+  }));
+}
+
+function findLocalNamespace(scope, local) {
+  return findLocalBinding(scope, found => ({
+    Statement(path) {
+      path.skip();
+    },
+    Declaration(path) {
+      if (path.node?.id?.name === local) {
+        found(path);
+        path.stop();
+      } else {
+        path.skip();
+      }
+    }
+  }));
+}
+
+/**
+ * Find a declaration node path based on its name and type in a specific scope.
+ * @param scope searching scope
+ * @param local declaration local name in this scope
+ * @param type declaration optional type
+ * @returns
+ */
+export function findDeclaration(scope, local, type = '*') {
+  let rv;
+  let scopePath = scope.path;
+  while (!rv && scopePath) {
+    scopePath.traverse({
+      Declaration(path) {
+        if (
+          (type === '*' || path.node.type === type) &&
+          path.node.id?.name === local
+        ) {
+          rv = path;
+          path.stop();
+        } else {
+          path.skip();
+        }
+      }
+    });
+    scopePath = scopePath.parentPath;
+  }
   return rv;
 }

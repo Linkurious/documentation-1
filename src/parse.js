@@ -97,7 +97,7 @@ const flatteners = {
     result.kind = 'event';
 
     if (tag.description) {
-      result.name = tag.description;
+      result.name = tag.description.split('\n')[0];
     }
   },
   /**
@@ -534,6 +534,34 @@ function flattenKindShorthand(result, tag, key) {
 }
 
 /**
+ * Retreive description next to specific tags.
+ * @param {string} rawComment raw comment string
+ * @param {string[]} tags tags to consider
+ * @returns description string
+ */
+function retrieveDescriptionNextToTags(rawComment, tags) {
+  // regex to retreive the whole description string (new lines included)
+  const descLines = new RegExp(
+    `@(${tags.join(
+      '|'
+    )})( {\\S*} \\S*| \\S*)?( |\\n)((.|\\n)*?)(?=(\\s*\\*(\\s?@[a-z]*))|\\*\\/|$)`,
+    'g'
+  );
+  let match;
+  let lines = '';
+  // eslint-disable-next-line no-cond-assign
+  while ((match = descLines.exec(rawComment)) !== null) {
+    if (match[4]) {
+      // eslint-disable-next-line prefer-destructuring
+      lines = match[4];
+      break;
+    }
+  }
+  // clean up the text, remove spaces, new lines and '*'
+  return lines ? lines.replace(/\s*?\*\s?/g, ' ').replace(/^ /, '') : '';
+}
+
+/**
  * Parse a comment with doctrine, decorate the result with file position and code
  * context, handle parsing errors, and fix up various infelicities in the structure
  * outputted by doctrine.
@@ -621,6 +649,16 @@ export default function parseJSDoc(comment, loc, context) {
     lineNumbers: true
   });
 
+  if (result.description === '') {
+    result.description = retrieveDescriptionNextToTags(comment, [
+      'public',
+      'class',
+      'method',
+      'typedef',
+      'event'
+    ]);
+  }
+
   result.loc = loc;
   result.context = context;
 
@@ -660,7 +698,7 @@ export default function parseJSDoc(comment, loc, context) {
       flatteners[tag.title](result, tag, tag.title);
     } else {
       result.errors.push({
-        message: 'unknown tag @' + tag.title,
+        message: `unknown tag @${tag.title}`,
         commentLineNumber: tag.lineNumber
       });
     }
