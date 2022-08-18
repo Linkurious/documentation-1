@@ -3,7 +3,7 @@ import findTarget from './finders.js';
 
 function prefixedName(name, prefix) {
   if (prefix.length) {
-    return prefix.join('.') + '.' + name;
+    return `${prefix.join('.')}.${name}`;
   }
   return name;
 }
@@ -72,7 +72,8 @@ export default function inferProperties(comment) {
   function inferProperties(value, prefix) {
     if (
       value.type === 'ObjectTypeAnnotation' ||
-      value.type === 'TSTypeLiteral'
+      value.type === 'TSTypeLiteral' ||
+      value.type === 'TSInterfaceBody'
     ) {
       const properties = value.properties || value.members || value.body || [];
       properties.forEach(function (property) {
@@ -103,6 +104,8 @@ export default function inferProperties(comment) {
       inferProperties(path.node.right, []);
     } else if (path.isTSTypeAliasDeclaration()) {
       inferProperties(path.node.typeAnnotation, []);
+    } else if (path.isTSInterfaceDeclaration()) {
+      inferProperties(path.node.body, []);
     }
   }
 

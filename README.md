@@ -1,3 +1,29 @@
+### 🎯 Purpose of this branch
+
+Reproduce issues that I currently encounter when generating documentation with documentation.js
+
+### How to reproduce the "issues"
+
+`npm i && npm run doc:e:docd`
+
+Open the generated documentation `example/index.html`
+
+Then check the comments in `example/doc.d.ts`
+
+### List of "issues"
+
+- ~~#1 ignored class methods in declaration files~~
+- ~~#2 some jsdoc description is not consumed~~
+- ~~#3 event names and description using `@event` tag are corrupted~~
+- #4 event is not part of the class "Instance Members"
+- ~~#5 documentation for interfaces is missing~~
+
+---
+
+---
+
+---
+
 <p align="center">
   <img src="./.github/documentation-js-logo.png" width="650" />
 </p>
